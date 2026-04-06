@@ -33,6 +33,14 @@
   table.heatmap tr:hover { background: #1e2028; }
   .note { font-size: 0.75rem; color: #4a4740; margin-top: 2rem; border-top: 1px solid #1e1e1e; padding-top: 1rem; }
   .click-hint { font-size: 0.72rem; color: #4a4740; font-style: italic; margin-top: 0.3rem; }
+  .interpretation {
+    font-size: 0.82rem; color: #9a9590; line-height: 1.65;
+    margin-top: 0.8rem; padding: 0.8rem 1rem;
+    background: #13151a; border-left: 2px solid #c9a96e44;
+    border-radius: 0 4px 4px 0;
+  }
+  .interpretation strong { color: #c9a96e; font-weight: 600; }
+  .interpretation em { color: #b0a89e; }
 
   /* Letter panel */
   #letterPanel {
@@ -119,18 +127,27 @@
     <div class="chart-desc">Each point = one letter. Click any point to read the Latin text and see its morphological breakdown.</div>
     <canvas id="scatterTrends"></canvas>
     <p class="click-hint">Click a data point to open the letter</p>
+    <div class="interpretation">
+      <strong>What this shows:</strong> The share of passive voice constructions in each letter, plotted over 700 years. In classical Latin (Cicero, Seneca), passive usage clusters around 20&ndash;25%. By the 5th&ndash;6th centuries (Sidonius, Cassiodorus), it rises to 35&ndash;40%. <strong>Why it matters:</strong> Rising passivization is a hallmark of late Latin style&mdash;authors increasingly use impersonal and passive constructions, possibly reflecting chancery register influence and the bureaucratization of elite correspondence. The variance within each author (the vertical spread of dots at each time-point) is itself informative: <em>high variance may indicate register-switching depending on recipient</em>.
+    </div>
   </div>
 
   <div class="chart-container">
     <div class="chart-title">Case Distribution by Author</div>
     <div class="chart-desc">Mean case fractions per collection. Click a bar to browse letters.</div>
     <canvas id="caseBars"></canvas>
+    <div class="interpretation">
+      <strong>What this shows:</strong> How the distribution of grammatical cases shifts across authors. <strong>Key pattern:</strong> Cicero's Latin is heavily accusative (~40%)&mdash;he builds long, transitive sentences with direct objects. Later authors show a flatter distribution with rising ablative and genitive shares, reflecting the shift toward prepositional phrases (<em>de + ablative</em>, <em>pro + ablative</em>) replacing bare case constructions. This is one of the most robust markers of the synthetic-to-analytic transition in late Latin.
+    </div>
   </div>
 
   <div class="chart-container">
     <div class="chart-title">Derived Ratios by Author</div>
     <div class="chart-desc">Subordination, passive voice, nominal ratio. Click to browse.</div>
     <canvas id="ratioBars"></canvas>
+    <div class="interpretation">
+      <strong>What this shows:</strong> Three composite metrics. <em>Subjunctive ratio</em> = share of finite verbs in the subjunctive (higher = more subordinate clauses, indirect speech, hypotheticals). <em>Passive ratio</em> = passive voice share. <em>Nominal ratio</em> = nouns divided by nouns+verbs (higher = more noun-heavy, less action-oriented prose). <strong>Key finding:</strong> The nominal ratio rises dramatically from Cicero (0.37) to Ennodius (0.63)&mdash;late antique prose becomes increasingly nominal and static, favoring abstract nouns over verbal action.
+    </div>
   </div>
 </div>
 
@@ -141,6 +158,9 @@
   <div class="heatmap-container">
     <table class="heatmap" id="heatmapTable"></table>
   </div>
+  <div class="interpretation">
+    <strong>How to read this:</strong> Each row is a morphological feature, each column an author, ordered chronologically left to right. Warmer/brighter cells = higher values. Read across a row to see how one feature changes over time; read down a column to see one author's full morphological fingerprint. <strong>Notable:</strong> Seneca's column stands out&mdash;very high nominative, very low ablative and subjunctive&mdash;consistent with his epigrammatic, declarative style. Symmachus shows the highest genitive usage (0.213), reflecting his ornate, heavily nested possessive constructions.
+  </div>
 </div>
 
 <div class="grid" style="margin-top:2rem;">
@@ -148,16 +168,22 @@
     <div class="chart-title">Radar: Classical vs Late Antique</div>
     <div class="chart-desc">Cicero vs Gregory vs Sidonius</div>
     <canvas id="radarCompare"></canvas>
+    <div class="interpretation">
+      <strong>What this shows:</strong> Overlaid morphological fingerprints for three authors spanning 650 years. Where Cicero (orange) bulges right on accusative and subjunctive, Gregory (grey) expands upward on nominal ratio and passive. Sidonius (purple) is the most extreme on passive voice&mdash;he is a self-consciously archaizing stylist who paradoxically deploys very un-classical morphological patterns. <strong>This is the core of the research question:</strong> do these fingerprint shapes correlate with where an author sits in the correspondence network?
+    </div>
   </div>
   <div class="chart-container">
     <div class="chart-title">Prep-per-Token (Analytic Tendency)</div>
     <div class="chart-desc">Preposition density as analytic shift proxy. Click to browse.</div>
     <canvas id="prepBar"></canvas>
+    <div class="interpretation">
+      <strong>What this shows:</strong> How often prepositions appear relative to total tokens. Classical Latin uses case endings to express relationships (<em>Romam</em> = "to Rome"); late Latin increasingly uses prepositions instead (<em>ad Romam</em>). Higher values suggest a more analytic, less synthetic grammar. <strong>Surprise:</strong> Cicero and Augustine actually show the highest preposition density&mdash;possibly because informal/argumentative register uses more prepositional phrases than the formal chancery style of Cassiodorus or Ennodius. Genre matters as much as chronology.
+    </div>
   </div>
 </div>
 
 <h3>All 50 Letters</h3>
-<p class="subtitle">Click any row to open the letter with its Latin text and morphological breakdown</p>
+<p class="subtitle">Click any row to open the letter with its Latin text and morphological breakdown. The slide-out panel shows the cleaned Latin original alongside per-letter morphological statistics&mdash;compare individual letters to see how the same author varies across correspondents.</p>
 <div class="chart-container full">
   <div class="heatmap-container">
     <table class="heatmap" id="letterTable"></table>
