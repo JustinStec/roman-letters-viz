@@ -14,116 +14,91 @@
     padding: 2rem;
     line-height: 1.6;
   }
-  h1 {
-    font-size: 1.8rem;
-    color: #c9a96e;
-    margin-bottom: 0.3rem;
-    letter-spacing: 0.03em;
-  }
-  h2 {
-    font-size: 1.2rem;
-    color: #8a8578;
-    font-weight: 400;
-    margin-bottom: 2rem;
-  }
-  h3 {
-    font-size: 1.1rem;
-    color: #c9a96e;
-    margin: 2.5rem 0 0.5rem;
-    border-bottom: 1px solid #2a2a2a;
-    padding-bottom: 0.4rem;
-  }
-  .subtitle {
-    color: #6b6560;
-    font-size: 0.85rem;
-    margin-bottom: 1.5rem;
-    font-style: italic;
-  }
-  .grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-    margin-bottom: 2rem;
-  }
-  .chart-container {
-    background: #181a20;
-    border: 1px solid #2a2a2a;
-    border-radius: 8px;
-    padding: 1.5rem;
-    position: relative;
-  }
-  .chart-container.full {
-    grid-column: 1 / -1;
-  }
-  .chart-title {
-    font-size: 0.95rem;
-    color: #c9a96e;
-    margin-bottom: 0.3rem;
-  }
-  .chart-desc {
-    font-size: 0.78rem;
-    color: #6b6560;
-    margin-bottom: 1rem;
-  }
-  canvas { max-height: 360px; }
+  h1 { font-size: 1.8rem; color: #c9a96e; margin-bottom: 0.3rem; letter-spacing: 0.03em; }
+  h2 { font-size: 1.2rem; color: #8a8578; font-weight: 400; margin-bottom: 2rem; }
+  h3 { font-size: 1.1rem; color: #c9a96e; margin: 2.5rem 0 0.5rem; border-bottom: 1px solid #2a2a2a; padding-bottom: 0.4rem; }
+  .subtitle { color: #6b6560; font-size: 0.85rem; margin-bottom: 1.5rem; font-style: italic; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+  .chart-container { background: #181a20; border: 1px solid #2a2a2a; border-radius: 8px; padding: 1.5rem; position: relative; }
+  .chart-container.full { grid-column: 1 / -1; }
+  .chart-title { font-size: 0.95rem; color: #c9a96e; margin-bottom: 0.3rem; }
+  .chart-desc { font-size: 0.78rem; color: #6b6560; margin-bottom: 1rem; }
+  canvas { max-height: 360px; cursor: pointer; }
   .full canvas { max-height: 420px; }
-  .heatmap-container {
-    overflow-x: auto;
-  }
-  table.heatmap {
-    border-collapse: collapse;
-    width: 100%;
-    font-size: 0.82rem;
-  }
-  table.heatmap th {
-    padding: 0.5rem 0.7rem;
-    text-align: left;
-    color: #8a8578;
-    font-weight: 400;
-    border-bottom: 1px solid #2a2a2a;
-    white-space: nowrap;
-  }
-  table.heatmap td {
-    padding: 0.45rem 0.7rem;
-    text-align: center;
-    border-bottom: 1px solid #1e1e1e;
-    font-variant-numeric: tabular-nums;
-  }
-  table.heatmap td:first-child {
-    text-align: left;
-    color: #c9a96e;
-    font-weight: 500;
-  }
+  .heatmap-container { overflow-x: auto; }
+  table.heatmap { border-collapse: collapse; width: 100%; font-size: 0.82rem; }
+  table.heatmap th { padding: 0.5rem 0.7rem; text-align: left; color: #8a8578; font-weight: 400; border-bottom: 1px solid #2a2a2a; white-space: nowrap; }
+  table.heatmap td { padding: 0.45rem 0.7rem; text-align: center; border-bottom: 1px solid #1e1e1e; font-variant-numeric: tabular-nums; }
+  table.heatmap td:first-child { text-align: left; color: #c9a96e; font-weight: 500; }
   table.heatmap tr:hover { background: #1e2028; }
-  .legend {
-    display: flex;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    margin: 1rem 0;
-    font-size: 0.78rem;
-    color: #6b6560;
+  .note { font-size: 0.75rem; color: #4a4740; margin-top: 2rem; border-top: 1px solid #1e1e1e; padding-top: 1rem; }
+  .click-hint { font-size: 0.72rem; color: #4a4740; font-style: italic; margin-top: 0.3rem; }
+
+  /* Letter panel */
+  #letterPanel {
+    position: fixed; top: 0; right: -520px; width: 500px; height: 100vh;
+    background: #14161c; border-left: 2px solid #c9a96e33;
+    box-shadow: -8px 0 30px rgba(0,0,0,0.5);
+    transition: right 0.3s ease; z-index: 1000;
+    display: flex; flex-direction: column; overflow: hidden;
   }
-  .legend span {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
+  #letterPanel.open { right: 0; }
+  #letterPanel .panel-header {
+    padding: 1.2rem 1.5rem; background: #181a20;
+    border-bottom: 1px solid #2a2a2a; flex-shrink: 0;
   }
-  .legend .dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    display: inline-block;
+  #letterPanel .panel-header h4 { color: #c9a96e; font-size: 1rem; margin-bottom: 0.3rem; }
+  #letterPanel .panel-header .meta { font-size: 0.78rem; color: #6b6560; line-height: 1.5; }
+  #letterPanel .panel-header .meta strong { color: #8a8578; }
+  #letterPanel .close-btn {
+    position: absolute; top: 1rem; right: 1rem;
+    background: none; border: 1px solid #2a2a2a; color: #8a8578;
+    width: 28px; height: 28px; border-radius: 4px; cursor: pointer;
+    font-size: 1rem; display: flex; align-items: center; justify-content: center;
   }
-  .note {
-    font-size: 0.75rem;
-    color: #4a4740;
-    margin-top: 2rem;
-    border-top: 1px solid #1e1e1e;
-    padding-top: 1rem;
+  #letterPanel .close-btn:hover { border-color: #c9a96e; color: #c9a96e; }
+  #letterPanel .panel-morph {
+    padding: 1rem 1.5rem; background: #1a1c22;
+    border-bottom: 1px solid #2a2a2a; flex-shrink: 0;
   }
+  .morph-section-title {
+    color: #c9a96e; font-size: 0.72rem; text-transform: uppercase;
+    letter-spacing: 0.08em; margin-top: 0.6rem; padding-bottom: 0.2rem;
+    border-bottom: 1px solid #222;
+  }
+  .morph-section-title:first-child { margin-top: 0; }
+  .mini-bar-row { display: flex; align-items: center; gap: 0.5rem; margin: 0.2rem 0; }
+  .mini-bar-label { width: 50px; font-size: 0.72rem; color: #6b6560; text-align: right; flex-shrink: 0; }
+  .mini-bar-track { flex: 1; height: 10px; background: #222; border-radius: 3px; overflow: hidden; }
+  .mini-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+  .mini-bar-val { width: 40px; font-size: 0.72rem; color: #8a8578; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+  #letterPanel .panel-body { padding: 1.5rem; overflow-y: auto; flex: 1; }
+  #letterPanel .latin-text {
+    font-family: 'Georgia', serif; font-size: 0.88rem; line-height: 1.8;
+    color: #d0cdc5; white-space: pre-wrap; word-wrap: break-word;
+  }
+
+  #overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.4); z-index: 999; display: none; cursor: pointer;
+  }
+  #overlay.open { display: block; }
 </style>
 </head>
 <body>
+
+<div id="overlay" onclick="closePanel()"></div>
+<div id="letterPanel">
+  <button class="close-btn" onclick="closePanel()">&times;</button>
+  <div class="panel-header">
+    <h4 id="panelTitle"></h4>
+    <div class="meta" id="panelMeta"></div>
+  </div>
+  <div class="panel-morph" id="panelMorph"></div>
+  <div class="panel-body">
+    <div class="latin-text" id="panelLatin"></div>
+  </div>
+</div>
 
 <h1>Latin Morphological Profiles</h1>
 <h2>Prototype: 50 letters across 700 years (66 BC – 597 AD)</h2>
@@ -134,25 +109,26 @@
 <div class="grid">
   <div class="chart-container full">
     <div class="chart-title">Morphological Drift Over Time</div>
-    <div class="chart-desc">Each point = one letter. Lines = LOESS-approximated collection means, ordered chronologically.</div>
+    <div class="chart-desc">Each point = one letter. Click any point to read the Latin text and see its morphological breakdown.</div>
     <canvas id="scatterTrends"></canvas>
+    <p class="click-hint">Click a data point to open the letter</p>
   </div>
 
   <div class="chart-container">
     <div class="chart-title">Case Distribution by Author</div>
-    <div class="chart-desc">Mean case fractions (of all case-bearing tokens) per collection</div>
+    <div class="chart-desc">Mean case fractions per collection. Click a bar to browse letters.</div>
     <canvas id="caseBars"></canvas>
   </div>
 
   <div class="chart-container">
     <div class="chart-title">Derived Ratios by Author</div>
-    <div class="chart-desc">Subordination (subjunctive share), passive voice share, nominal ratio (noun/verb balance)</div>
+    <div class="chart-desc">Subordination, passive voice, nominal ratio. Click to browse.</div>
     <canvas id="ratioBars"></canvas>
   </div>
 </div>
 
 <h3>Feature Heatmap</h3>
-<p class="subtitle">All morphological dimensions at a glance — darker = higher relative value</p>
+<p class="subtitle">All morphological dimensions at a glance. Click any cell to browse that collection.</p>
 
 <div class="chart-container full">
   <div class="heatmap-container">
@@ -163,25 +139,33 @@
 <div class="grid" style="margin-top:2rem;">
   <div class="chart-container">
     <div class="chart-title">Radar: Classical vs Late Antique</div>
-    <div class="chart-desc">Cicero (combined) vs Gregory the Great — normalized morphological fingerprints</div>
+    <div class="chart-desc">Cicero vs Gregory vs Sidonius</div>
     <canvas id="radarCompare"></canvas>
   </div>
-
   <div class="chart-container">
     <div class="chart-title">Prep-per-Token (Analytic Tendency)</div>
-    <div class="chart-desc">Preposition density as a proxy for the synthetic→analytic shift in late Latin</div>
+    <div class="chart-desc">Preposition density as analytic shift proxy. Click to browse.</div>
     <canvas id="prepBar"></canvas>
+  </div>
+</div>
+
+<h3>All 50 Letters</h3>
+<p class="subtitle">Click any row to open the letter with its Latin text and morphological breakdown</p>
+<div class="chart-container full">
+  <div class="heatmap-container">
+    <table class="heatmap" id="letterTable"></table>
   </div>
 </div>
 
 <p class="note">
   Data: 50 letters sampled from Roman Letters corpus (romanletters.org), CC BY 4.0.<br>
   Tagger: LatinCy 3.9.0 (la_core_web_lg). 90.4% morph accuracy on UD treebanks.<br>
-  n=5 per collection — these are prototype results; full run covers 4,390 Latin letters.
+  n=5 per collection — prototype results; full run covers 4,390 Latin letters.
 </p>
 
+<script src="letters_data.js"></script>
 <script>
-// --- DATA ---
+// --- PANEL ---
 const collections = [
   { key: 'cicero_atticus', label: 'Cicero (Att.)', year: -55, color: '#e07b54' },
   { key: 'cicero_familiares', label: 'Cicero (Fam.)', year: -49, color: '#d4633a' },
@@ -194,8 +178,60 @@ const collections = [
   { key: 'cassiodorus', label: 'Cassiodorus', year: 522, color: '#c96e6e' },
   { key: 'gregory_great', label: 'Gregory', year: 595, color: '#7a8a9a' }
 ];
+const collMap = {}; collections.forEach(c => collMap[c.key] = c);
 
-// Aggregate data from the prototype run
+function findLettersByCollection(key) { return allLetters.filter(l => l.coll === key); }
+
+function openPanel(letter) {
+  if (!letter) return;
+  const ci = collMap[letter.coll];
+  document.getElementById('panelTitle').textContent = `${ci ? ci.label : letter.coll} — Letter ${letter.num}`;
+
+  let meta = '';
+  if (letter.sender) meta += `<strong>From:</strong> ${letter.sender}${letter.sender_role ? ' (' + letter.sender_role + ')' : ''}<br>`;
+  if (letter.recipient) meta += `<strong>To:</strong> ${letter.recipient}${letter.recipient_role ? ' (' + letter.recipient_role + ')' : ''}<br>`;
+  meta += `<strong>Date:</strong> c. ${Math.abs(letter.year)} ${letter.year < 0 ? 'BC' : 'AD'} &nbsp;&middot;&nbsp; <strong>Tokens:</strong> ${letter.tokens}`;
+  document.getElementById('panelMeta').innerHTML = meta;
+
+  const caseColors = { Nom: '#e07b54', Gen: '#c9a96e', Dat: '#8a6ec9', Acc: '#6ec9a8', Abl: '#6ea8c9', Voc: '#c96ea8', Loc: '#999' };
+  let m = '<div class="morph-section-title">Case Distribution</div>';
+  for (const [c, v] of Object.entries(letter.case || {})) {
+    const pct = (v * 100).toFixed(1);
+    m += `<div class="mini-bar-row"><div class="mini-bar-label">${c}</div><div class="mini-bar-track"><div class="mini-bar-fill" style="width:${pct}%;background:${caseColors[c]||'#888'}"></div></div><div class="mini-bar-val">${pct}%</div></div>`;
+  }
+  m += '<div class="morph-section-title">Derived Ratios</div>';
+  [{ l: 'Subjunctive', v: letter.subj, c: '#c9a96e' }, { l: 'Passive', v: letter.pass, c: '#6ec9a8' }, { l: 'Nominal', v: letter.nomR, c: '#8a6ec9' }, { l: 'Prep/Tok', v: letter.prep, c: '#c96e6e' }].forEach(r => {
+    const pct = (r.v * 100).toFixed(1);
+    const barW = r.l === 'Prep/Tok' ? (r.v * 500).toFixed(1) : pct;
+    m += `<div class="mini-bar-row"><div class="mini-bar-label">${r.l}</div><div class="mini-bar-track"><div class="mini-bar-fill" style="width:${barW}%;background:${r.c}"></div></div><div class="mini-bar-val">${pct}%</div></div>`;
+  });
+  if (letter.mood) {
+    m += '<div class="morph-section-title">Mood</div>';
+    for (const [k, v] of Object.entries(letter.mood)) {
+      const pct = (v * 100).toFixed(1);
+      m += `<div class="mini-bar-row"><div class="mini-bar-label">${k}</div><div class="mini-bar-track"><div class="mini-bar-fill" style="width:${pct}%;background:#8a8578"></div></div><div class="mini-bar-val">${pct}%</div></div>`;
+    }
+  }
+  if (letter.tense) {
+    m += '<div class="morph-section-title">Tense</div>';
+    for (const [k, v] of Object.entries(letter.tense)) {
+      const pct = (v * 100).toFixed(1);
+      m += `<div class="mini-bar-row"><div class="mini-bar-label">${k}</div><div class="mini-bar-track"><div class="mini-bar-fill" style="width:${pct}%;background:#6b8a6e"></div></div><div class="mini-bar-val">${pct}%</div></div>`;
+    }
+  }
+  document.getElementById('panelMorph').innerHTML = m;
+  document.getElementById('panelLatin').textContent = letter.latin || '(No Latin text available)';
+  document.getElementById('letterPanel').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closePanel() {
+  document.getElementById('letterPanel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+
+// --- AGGREGATE DATA ---
 const aggData = {
   cicero_atticus:       { nom: 0.221, gen: 0.081, acc: 0.414, abl: 0.217, dat: 0.067, subj: 0.373, pass: 0.225, nomR: 0.342, prep: 0.0758 },
   cicero_familiares:    { nom: 0.261, gen: 0.104, acc: 0.358, abl: 0.180, dat: 0.058, subj: 0.229, pass: 0.236, nomR: 0.405, prep: 0.0625 },
@@ -209,111 +245,45 @@ const aggData = {
   gregory_great:        { nom: 0.278, gen: 0.176, acc: 0.253, abl: 0.209, dat: 0.060, subj: 0.304, pass: 0.302, nomR: 0.594, prep: 0.0668 }
 };
 
-// Per-letter scatter data
-const letterData = [
-  { coll: 'cicero_atticus', year: -66, pass: 0.265, nomR: 0.342, subj: 0.308, prep: 0.0667 },
-  { coll: 'cicero_familiares', year: -56, pass: 0.392, nomR: 0.405, subj: 0.145, prep: 0.0333 },
-  { coll: 'cicero_familiares', year: -50, pass: 0.100, nomR: 0.405, subj: 0.417, prep: 0.0481 },
-  { coll: 'cicero_atticus', year: -49, pass: 0.325, nomR: 0.342, subj: 0.357, prep: 0.0889 },
-  { coll: 'cicero_familiares', year: -49, pass: 0.231, nomR: 0.405, subj: 0.350, prep: 0.0887 },
-  { coll: 'cicero_atticus', year: -47, pass: 0.190, nomR: 0.342, subj: 0.344, prep: 0.0725 },
-  { coll: 'cicero_familiares', year: -47, pass: 0.211, nomR: 0.405, subj: 0.000, prep: 0.0650 },
-  { coll: 'cicero_atticus', year: -45, pass: 0.156, nomR: 0.342, subj: 0.410, prep: 0.0736 },
-  { coll: 'cicero_familiares', year: -45, pass: 0.245, nomR: 0.405, subj: 0.231, prep: 0.0775 },
-  { coll: 'cicero_atticus', year: -44, pass: 0.192, nomR: 0.342, subj: 0.446, prep: 0.0773 },
-  { coll: 'seneca', year: 63, pass: 0.183, nomR: 0.382, subj: 0.164, prep: 0.0320 },
-  { coll: 'seneca', year: 63, pass: 0.209, nomR: 0.382, subj: 0.172, prep: 0.0410 },
-  { coll: 'seneca', year: 63, pass: 0.262, nomR: 0.382, subj: 0.115, prep: 0.0535 },
-  { coll: 'seneca', year: 63, pass: 0.205, nomR: 0.382, subj: 0.190, prep: 0.0375 },
-  { coll: 'seneca', year: 64, pass: 0.206, nomR: 0.382, subj: 0.192, prep: 0.0459 },
-  { coll: 'pliny_younger', year: 100, pass: 0.350, nomR: 0.456, subj: 0.333, prep: 0.0504 },
-  { coll: 'pliny_younger', year: 104, pass: 0.143, nomR: 0.456, subj: 0.100, prep: 0.0483 },
-  { coll: 'pliny_younger', year: 104, pass: 0.240, nomR: 0.456, subj: 0.365, prep: 0.0482 },
-  { coll: 'pliny_younger', year: 104, pass: 0.296, nomR: 0.456, subj: 0.476, prep: 0.0577 },
-  { coll: 'pliny_younger', year: 107, pass: 0.188, nomR: 0.456, subj: 0.083, prep: 0.0244 },
-  { coll: 'symmachus', year: 365, pass: 0.256, nomR: 0.542, subj: 0.333, prep: 0.0591 },
-  { coll: 'symmachus', year: 368, pass: 0.248, nomR: 0.542, subj: 0.279, prep: 0.0519 },
-  { coll: 'symmachus', year: 387, pass: 0.172, nomR: 0.542, subj: 0.227, prep: 0.0345 },
-  { coll: 'symmachus', year: 391, pass: 0.375, nomR: 0.542, subj: 0.231, prep: 0.0316 },
-  { coll: 'symmachus', year: 391, pass: 0.560, nomR: 0.542, subj: 0.294, prep: 0.0526 },
-  { coll: 'augustine_hippo', year: 388, pass: 0.352, nomR: 0.497, subj: 0.259, prep: 0.0444 },
-  { coll: 'augustine_hippo', year: 392, pass: 0.302, nomR: 0.497, subj: 0.338, prep: 0.0744 },
-  { coll: 'augustine_hippo', year: 405, pass: 0.267, nomR: 0.497, subj: 0.308, prep: 0.0853 },
-  { coll: 'augustine_hippo', year: 408, pass: 0.333, nomR: 0.497, subj: 0.229, prep: 0.0622 },
-  { coll: 'augustine_hippo', year: 426, pass: 0.324, nomR: 0.497, subj: 0.341, prep: 0.0696 },
-  { coll: 'sidonius_apollinaris', year: 467, pass: 0.426, nomR: 0.552, subj: 0.192, prep: 0.0725 },
-  { coll: 'sidonius_apollinaris', year: 467, pass: 0.542, nomR: 0.552, subj: 0.333, prep: 0.0538 },
-  { coll: 'sidonius_apollinaris', year: 467, pass: 0.408, nomR: 0.552, subj: 0.312, prep: 0.0359 },
-  { coll: 'sidonius_apollinaris', year: 467, pass: 0.323, nomR: 0.552, subj: 0.218, prep: 0.0391 },
-  { coll: 'sidonius_apollinaris', year: 468, pass: 0.265, nomR: 0.552, subj: 0.303, prep: 0.0537 },
-  { coll: 'ennodius_pavia', year: 494, pass: 0.290, nomR: 0.633, subj: 0.170, prep: 0.0391 },
-  { coll: 'ennodius_pavia', year: 500, pass: 0.340, nomR: 0.633, subj: 0.270, prep: 0.0449 },
-  { coll: 'ennodius_pavia', year: 501, pass: 0.196, nomR: 0.633, subj: 0.188, prep: 0.0363 },
-  { coll: 'ennodius_pavia', year: 507, pass: 0.370, nomR: 0.633, subj: 0.353, prep: 0.0422 },
-  { coll: 'ennodius_pavia', year: 508, pass: 0.350, nomR: 0.633, subj: 0.407, prep: 0.0528 },
-  { coll: 'cassiodorus', year: 522, pass: 0.404, nomR: 0.475, subj: 0.271, prep: 0.0513 },
-  { coll: 'cassiodorus', year: 522, pass: 0.265, nomR: 0.475, subj: 0.400, prep: 0.0677 },
-  { coll: 'cassiodorus', year: 522, pass: 0.406, nomR: 0.475, subj: 0.250, prep: 0.0235 },
-  { coll: 'cassiodorus', year: 522, pass: 0.380, nomR: 0.475, subj: 0.433, prep: 0.0415 },
-  { coll: 'cassiodorus', year: 522, pass: 0.276, nomR: 0.475, subj: 0.300, prep: 0.0348 },
-  { coll: 'gregory_great', year: 592, pass: 0.261, nomR: 0.594, subj: 0.389, prep: 0.0464 },
-  { coll: 'gregory_great', year: 594, pass: 0.277, nomR: 0.594, subj: 0.286, prep: 0.0674 },
-  { coll: 'gregory_great', year: 595, pass: 0.306, nomR: 0.594, subj: 0.342, prep: 0.0902 },
-  { coll: 'gregory_great', year: 597, pass: 0.364, nomR: 0.594, subj: 0.238, prep: 0.0639 },
-  { coll: 'gregory_great', year: 597, pass: 0.303, nomR: 0.594, subj: 0.264, prep: 0.0661 }
-];
-
-const collMap = {};
-collections.forEach(c => collMap[c.key] = c);
-
-// Chart.js global defaults
 Chart.defaults.color = '#8a8578';
 Chart.defaults.borderColor = '#2a2a2a';
 Chart.defaults.font.family = 'Georgia, serif';
 Chart.defaults.font.size = 11;
+const caseLabels = collections.map(c => c.label);
 
-// --- CHART 1: Scatter/Temporal Trends ---
-const scatterCtx = document.getElementById('scatterTrends').getContext('2d');
-
-function makeScatterDataset(metric, label) {
-  const datasets = [];
-  // Individual points
-  collections.forEach(c => {
-    const pts = letterData.filter(d => d.coll === c.key).map(d => ({ x: d.year, y: d[metric] }));
-    datasets.push({
-      label: c.label,
-      data: pts,
-      backgroundColor: c.color + '99',
-      borderColor: c.color,
-      pointRadius: 5,
-      pointHoverRadius: 7,
-      showLine: false
-    });
+// --- SCATTER (clickable) ---
+const scatterDatasets = [];
+collections.forEach(c => {
+  const cl = allLetters.filter(l => l.coll === c.key);
+  scatterDatasets.push({
+    label: c.label, data: cl.map(l => ({ x: l.year, y: l.pass, _idx: allLetters.indexOf(l) })),
+    backgroundColor: c.color + '99', borderColor: c.color,
+    pointRadius: 6, pointHoverRadius: 9, showLine: false
   });
-  // Trend line (collection means)
-  const trendPts = collections.map(c => ({ x: c.year, y: aggData[c.key][metric] }));
-  datasets.push({
-    label: 'Trend',
-    data: trendPts,
-    borderColor: '#c9a96e44',
-    borderWidth: 2,
-    borderDash: [6, 4],
-    pointRadius: 0,
-    showLine: true,
-    tension: 0.4,
-    fill: false
-  });
-  return datasets;
-}
+});
+scatterDatasets.push({
+  label: 'Trend', data: collections.map(c => ({ x: c.year, y: aggData[c.key].pass })),
+  borderColor: '#c9a96e44', borderWidth: 2, borderDash: [6,4],
+  pointRadius: 0, showLine: true, tension: 0.4, fill: false
+});
 
-new Chart(scatterCtx, {
-  type: 'scatter',
-  data: { datasets: makeScatterDataset('pass', 'Passive Ratio') },
+const scatterChart = new Chart(document.getElementById('scatterTrends'), {
+  type: 'scatter', data: { datasets: scatterDatasets },
   options: {
     responsive: true,
+    onClick(e, els) {
+      if (!els.length) return;
+      const pt = scatterChart.data.datasets[els[0].datasetIndex].data[els[0].index];
+      if (pt._idx !== undefined) openPanel(allLetters[pt._idx]);
+    },
     plugins: {
       title: { display: true, text: 'Passive Voice Ratio Over Time', color: '#e0ddd5', font: { size: 13 } },
-      legend: { display: true, position: 'bottom', labels: { boxWidth: 10, padding: 12, font: { size: 10 } } }
+      legend: { position: 'bottom', labels: { boxWidth: 10, padding: 12, font: { size: 10 } } },
+      tooltip: { callbacks: { label(ctx) {
+        const pt = ctx.raw; if (pt._idx === undefined) return ctx.dataset.label;
+        const l = allLetters[pt._idx];
+        return `${l.sender||l.coll} → ${l.recipient||'?'} (${Math.abs(l.year)} ${l.year<0?'BC':'AD'}) — ${(l.pass*100).toFixed(1)}%`;
+      }}}
     },
     scales: {
       x: { title: { display: true, text: 'Year', color: '#6b6560' }, grid: { color: '#1e1e1e' } },
@@ -322,220 +292,96 @@ new Chart(scatterCtx, {
   }
 });
 
-// --- CHART 2: Case Distribution ---
-const caseCtx = document.getElementById('caseBars').getContext('2d');
-const caseLabels = collections.map(c => c.label);
-const caseColors = { Nom: '#e07b54', Gen: '#c9a96e', Acc: '#6ec9a8', Abl: '#6ea8c9', Dat: '#8a6ec9' };
-
-new Chart(caseCtx, {
+// --- CASE BARS (clickable) ---
+const caseColorMap = { Nom: '#e07b54', Gen: '#c9a96e', Acc: '#6ec9a8', Abl: '#6ea8c9', Dat: '#8a6ec9' };
+new Chart(document.getElementById('caseBars'), {
   type: 'bar',
-  data: {
-    labels: caseLabels,
-    datasets: ['nom', 'gen', 'acc', 'abl', 'dat'].map((k, i) => ({
-      label: k.charAt(0).toUpperCase() + k.slice(1),
-      data: collections.map(c => aggData[c.key][k]),
-      backgroundColor: Object.values(caseColors)[i] + 'cc',
-      borderColor: Object.values(caseColors)[i],
-      borderWidth: 1
-    }))
-  },
+  data: { labels: caseLabels, datasets: ['nom','gen','acc','abl','dat'].map((k,i) => ({
+    label: k.charAt(0).toUpperCase()+k.slice(1), data: collections.map(c => aggData[c.key][k]),
+    backgroundColor: Object.values(caseColorMap)[i]+'cc', borderColor: Object.values(caseColorMap)[i], borderWidth: 1
+  }))},
   options: {
     responsive: true,
+    onClick(e, els) { if (els.length) { const ls = findLettersByCollection(collections[els[0].index].key); if (ls.length) openPanel(ls[0]); }},
     plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
-    scales: {
-      x: { stacked: true, ticks: { font: { size: 9 }, maxRotation: 45 }, grid: { display: false } },
-      y: { stacked: true, max: 1.0, title: { display: true, text: 'Fraction', color: '#6b6560' }, grid: { color: '#1e1e1e' } }
-    }
+    scales: { x: { stacked: true, ticks: { font: { size: 9 }, maxRotation: 45 }, grid: { display: false } }, y: { stacked: true, max: 1.0, grid: { color: '#1e1e1e' } } }
   }
 });
 
-// --- CHART 3: Derived Ratios ---
-const ratioCtx = document.getElementById('ratioBars').getContext('2d');
-
-new Chart(ratioCtx, {
+// --- RATIO BARS (clickable) ---
+new Chart(document.getElementById('ratioBars'), {
   type: 'bar',
-  data: {
-    labels: caseLabels,
-    datasets: [
-      {
-        label: 'Subjunctive Ratio',
-        data: collections.map(c => aggData[c.key].subj),
-        backgroundColor: '#c9a96eaa',
-        borderColor: '#c9a96e',
-        borderWidth: 1
-      },
-      {
-        label: 'Passive Ratio',
-        data: collections.map(c => aggData[c.key].pass),
-        backgroundColor: '#6ec9a8aa',
-        borderColor: '#6ec9a8',
-        borderWidth: 1
-      },
-      {
-        label: 'Nominal Ratio',
-        data: collections.map(c => aggData[c.key].nomR),
-        backgroundColor: '#8a6ec9aa',
-        borderColor: '#8a6ec9',
-        borderWidth: 1
-      }
-    ]
-  },
+  data: { labels: caseLabels, datasets: [
+    { label: 'Subjunctive', data: collections.map(c => aggData[c.key].subj), backgroundColor: '#c9a96eaa', borderColor: '#c9a96e', borderWidth: 1 },
+    { label: 'Passive', data: collections.map(c => aggData[c.key].pass), backgroundColor: '#6ec9a8aa', borderColor: '#6ec9a8', borderWidth: 1 },
+    { label: 'Nominal', data: collections.map(c => aggData[c.key].nomR), backgroundColor: '#8a6ec9aa', borderColor: '#8a6ec9', borderWidth: 1 }
+  ]},
   options: {
     responsive: true,
+    onClick(e, els) { if (els.length) { const ls = findLettersByCollection(collections[els[0].index].key); if (ls.length) openPanel(ls[0]); }},
     plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
-    scales: {
-      x: { ticks: { font: { size: 9 }, maxRotation: 45 }, grid: { display: false } },
-      y: { max: 0.75, title: { display: true, text: 'Ratio', color: '#6b6560' }, grid: { color: '#1e1e1e' } }
-    }
+    scales: { x: { ticks: { font: { size: 9 }, maxRotation: 45 }, grid: { display: false } }, y: { max: 0.75, grid: { color: '#1e1e1e' } } }
   }
 });
 
-// --- CHART 4: Radar ---
-const radarCtx = document.getElementById('radarCompare').getContext('2d');
-const radarLabels = ['Nominative', 'Genitive', 'Accusative', 'Ablative', 'Subjunctive', 'Passive', 'Nominal', 'Prep Density'];
-
-function radarValues(key) {
-  const d = aggData[key];
-  return [d.nom, d.gen, d.acc, d.abl, d.subj, d.pass, d.nomR, d.prep * 10]; // scale prep up
-}
-
-// Combine both Cicero collections
-const ciceroCombined = {
-  nom: (aggData.cicero_atticus.nom + aggData.cicero_familiares.nom) / 2,
-  gen: (aggData.cicero_atticus.gen + aggData.cicero_familiares.gen) / 2,
-  acc: (aggData.cicero_atticus.acc + aggData.cicero_familiares.acc) / 2,
-  abl: (aggData.cicero_atticus.abl + aggData.cicero_familiares.abl) / 2,
-  subj: (aggData.cicero_atticus.subj + aggData.cicero_familiares.subj) / 2,
-  pass: (aggData.cicero_atticus.pass + aggData.cicero_familiares.pass) / 2,
-  nomR: (aggData.cicero_atticus.nomR + aggData.cicero_familiares.nomR) / 2,
-  prep: (aggData.cicero_atticus.prep + aggData.cicero_familiares.prep) / 2
-};
-
-new Chart(radarCtx, {
+// --- RADAR ---
+const cc = { nom: (aggData.cicero_atticus.nom+aggData.cicero_familiares.nom)/2, gen: (aggData.cicero_atticus.gen+aggData.cicero_familiares.gen)/2, acc: (aggData.cicero_atticus.acc+aggData.cicero_familiares.acc)/2, abl: (aggData.cicero_atticus.abl+aggData.cicero_familiares.abl)/2, subj: (aggData.cicero_atticus.subj+aggData.cicero_familiares.subj)/2, pass: (aggData.cicero_atticus.pass+aggData.cicero_familiares.pass)/2, nomR: (aggData.cicero_atticus.nomR+aggData.cicero_familiares.nomR)/2, prep: (aggData.cicero_atticus.prep+aggData.cicero_familiares.prep)/2 };
+const rl = ['Nominative','Genitive','Accusative','Ablative','Subjunctive','Passive','Nominal','Prep×10'];
+function rv(d) { return [d.nom,d.gen,d.acc,d.abl,d.subj,d.pass,d.nomR,d.prep*10]; }
+new Chart(document.getElementById('radarCompare'), {
   type: 'radar',
-  data: {
-    labels: radarLabels,
-    datasets: [
-      {
-        label: 'Cicero (66–43 BC)',
-        data: [ciceroCombined.nom, ciceroCombined.gen, ciceroCombined.acc, ciceroCombined.abl,
-               ciceroCombined.subj, ciceroCombined.pass, ciceroCombined.nomR, ciceroCombined.prep * 10],
-        backgroundColor: '#e07b5422',
-        borderColor: '#e07b54',
-        borderWidth: 2,
-        pointBackgroundColor: '#e07b54'
-      },
-      {
-        label: 'Gregory the Great (590–604)',
-        data: [aggData.gregory_great.nom, aggData.gregory_great.gen, aggData.gregory_great.acc,
-               aggData.gregory_great.abl, aggData.gregory_great.subj, aggData.gregory_great.pass,
-               aggData.gregory_great.nomR, aggData.gregory_great.prep * 10],
-        backgroundColor: '#7a8a9a22',
-        borderColor: '#7a8a9a',
-        borderWidth: 2,
-        pointBackgroundColor: '#7a8a9a'
-      },
-      {
-        label: 'Sidonius (455–480)',
-        data: [aggData.sidonius_apollinaris.nom, aggData.sidonius_apollinaris.gen,
-               aggData.sidonius_apollinaris.acc, aggData.sidonius_apollinaris.abl,
-               aggData.sidonius_apollinaris.subj, aggData.sidonius_apollinaris.pass,
-               aggData.sidonius_apollinaris.nomR, aggData.sidonius_apollinaris.prep * 10],
-        backgroundColor: '#8a6ec922',
-        borderColor: '#8a6ec9',
-        borderWidth: 2,
-        pointBackgroundColor: '#8a6ec9'
-      }
-    ]
-  },
-  options: {
-    responsive: true,
-    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
-    scales: {
-      r: {
-        beginAtZero: true,
-        max: 0.7,
-        grid: { color: '#2a2a2a' },
-        angleLines: { color: '#2a2a2a' },
-        pointLabels: { color: '#8a8578', font: { size: 10 } },
-        ticks: { display: false }
-      }
-    }
-  }
+  data: { labels: rl, datasets: [
+    { label: 'Cicero (66-43 BC)', data: rv(cc), backgroundColor: '#e07b5422', borderColor: '#e07b54', borderWidth: 2, pointBackgroundColor: '#e07b54' },
+    { label: 'Gregory (590-604)', data: rv(aggData.gregory_great), backgroundColor: '#7a8a9a22', borderColor: '#7a8a9a', borderWidth: 2, pointBackgroundColor: '#7a8a9a' },
+    { label: 'Sidonius (455-480)', data: rv(aggData.sidonius_apollinaris), backgroundColor: '#8a6ec922', borderColor: '#8a6ec9', borderWidth: 2, pointBackgroundColor: '#8a6ec9' }
+  ]},
+  options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }, scales: { r: { beginAtZero: true, max: 0.7, grid: { color: '#2a2a2a' }, angleLines: { color: '#2a2a2a' }, pointLabels: { color: '#8a8578', font: { size: 10 } }, ticks: { display: false } } } }
 });
 
-// --- CHART 5: Prep per Token ---
-const prepCtx = document.getElementById('prepBar').getContext('2d');
-
-new Chart(prepCtx, {
+// --- PREP BAR (clickable) ---
+new Chart(document.getElementById('prepBar'), {
   type: 'bar',
-  data: {
-    labels: caseLabels,
-    datasets: [{
-      label: 'Prepositions per Token',
-      data: collections.map(c => aggData[c.key].prep),
-      backgroundColor: collections.map(c => c.color + 'aa'),
-      borderColor: collections.map(c => c.color),
-      borderWidth: 1
-    }]
-  },
+  data: { labels: caseLabels, datasets: [{ label: 'Prep/Token', data: collections.map(c => aggData[c.key].prep), backgroundColor: collections.map(c => c.color+'aa'), borderColor: collections.map(c => c.color), borderWidth: 1 }] },
   options: {
     responsive: true,
+    onClick(e, els) { if (els.length) { const ls = findLettersByCollection(collections[els[0].index].key); if (ls.length) openPanel(ls[0]); }},
     plugins: { legend: { display: false } },
-    scales: {
-      x: { ticks: { font: { size: 9 }, maxRotation: 45 }, grid: { display: false } },
-      y: { title: { display: true, text: 'Prep / Token', color: '#6b6560' }, grid: { color: '#1e1e1e' } }
-    }
+    scales: { x: { ticks: { font: { size: 9 }, maxRotation: 45 }, grid: { display: false } }, y: { title: { display: true, text: 'Prep / Token', color: '#6b6560' }, grid: { color: '#1e1e1e' } } }
   }
 });
 
-// --- HEATMAP TABLE ---
-const heatmapEl = document.getElementById('heatmapTable');
-const features = [
-  { key: 'nom', label: 'Nominative' },
-  { key: 'gen', label: 'Genitive' },
-  { key: 'acc', label: 'Accusative' },
-  { key: 'abl', label: 'Ablative' },
-  { key: 'dat', label: 'Dative' },
-  { key: 'subj', label: 'Subjunctive %' },
-  { key: 'pass', label: 'Passive %' },
-  { key: 'nomR', label: 'Nominal Ratio' },
-  { key: 'prep', label: 'Prep Density' }
-];
+// --- HEATMAP ---
+const hEl = document.getElementById('heatmapTable');
+const fl = [{key:'nom',label:'Nominative'},{key:'gen',label:'Genitive'},{key:'acc',label:'Accusative'},{key:'abl',label:'Ablative'},{key:'dat',label:'Dative'},{key:'subj',label:'Subjunctive %'},{key:'pass',label:'Passive %'},{key:'nomR',label:'Nominal Ratio'},{key:'prep',label:'Prep Density'}];
+const fr = {}; fl.forEach(f => { const vs = collections.map(c => aggData[c.key][f.key]); fr[f.key] = { min: Math.min(...vs), max: Math.max(...vs) }; });
+function hc(v, mn, mx) { const t = mx===mn?0.5:(v-mn)/(mx-mn); return `rgb(${Math.round(30+t*170)},${Math.round(30+(1-Math.abs(t-0.5)*2)*80)},${Math.round(30+(1-t)*100)})`; }
 
-// Find min/max for each feature for color scaling
-const featureRanges = {};
-features.forEach(f => {
-  const vals = collections.map(c => aggData[c.key][f.key]);
-  featureRanges[f.key] = { min: Math.min(...vals), max: Math.max(...vals) };
-});
-
-function heatColor(val, min, max) {
-  const t = max === min ? 0.5 : (val - min) / (max - min);
-  const r = Math.round(30 + t * 170);
-  const g = Math.round(30 + (1 - Math.abs(t - 0.5) * 2) * 80);
-  const b = Math.round(30 + (1 - t) * 100);
-  return `rgb(${r}, ${g}, ${b})`;
-}
-
-let html = '<thead><tr><th></th>';
-collections.forEach(c => { html += `<th>${c.label}</th>`; });
-html += '</tr></thead><tbody>';
-
-features.forEach(f => {
-  html += `<tr><td>${f.label}</td>`;
-  const range = featureRanges[f.key];
+let hh = '<thead><tr><th></th>'; collections.forEach(c => { hh += `<th>${c.label}</th>`; }); hh += '</tr></thead><tbody>';
+fl.forEach(f => {
+  hh += `<tr><td>${f.label}</td>`;
   collections.forEach(c => {
-    const val = aggData[c.key][f.key];
-    const bg = heatColor(val, range.min, range.max);
-    html += `<td style="background:${bg};color:#e0ddd5">${val.toFixed(3)}</td>`;
+    const v = aggData[c.key][f.key]; const bg = hc(v, fr[f.key].min, fr[f.key].max);
+    hh += `<td style="background:${bg};color:#e0ddd5;cursor:pointer" onclick="openPanel(findLettersByCollection('${c.key}')[0])">${v.toFixed(3)}</td>`;
   });
-  html += '</tr>';
+  hh += '</tr>';
 });
+hEl.innerHTML = hh + '</tbody>';
 
-html += '</tbody>';
-heatmapEl.innerHTML = html;
+// --- LETTER TABLE ---
+const lt = document.getElementById('letterTable');
+let lh = '<thead><tr><th>Collection</th><th>#</th><th>Year</th><th>From</th><th>To</th><th>Tokens</th><th>Nom%</th><th>Acc%</th><th>Abl%</th><th>Subj%</th><th>Pass%</th><th>NomR</th></tr></thead><tbody>';
+allLetters.forEach((l, i) => {
+  const ci = collMap[l.coll]; const clr = ci ? ci.color : '#888';
+  lh += `<tr style="cursor:pointer;border-left:3px solid ${clr}" onclick="openPanel(allLetters[${i}])">
+    <td>${ci?ci.label:l.coll}</td><td>${l.num||'?'}</td>
+    <td>${Math.abs(l.year)} ${l.year<0?'BC':'AD'}</td>
+    <td>${(l.sender||'').substring(0,20)}</td><td>${(l.recipient||'').substring(0,20)}</td>
+    <td>${l.tokens}</td>
+    <td>${((l.case?.Nom||0)*100).toFixed(1)}</td><td>${((l.case?.Acc||0)*100).toFixed(1)}</td>
+    <td>${((l.case?.Abl||0)*100).toFixed(1)}</td><td>${(l.subj*100).toFixed(1)}</td>
+    <td>${(l.pass*100).toFixed(1)}</td><td>${(l.nomR*100).toFixed(1)}</td></tr>`;
+});
+lt.innerHTML = lh + '</tbody>';
 </script>
-
 </body>
 </html>
