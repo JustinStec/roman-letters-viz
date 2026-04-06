@@ -142,17 +142,9 @@
 
 <!-- ==================== SECTION 3 ==================== -->
 <h3>3. Code-Switching: Do Authors Shift Register by Recipient?</h3>
-<p class="section-intro">For authors with enough letters going to different network communities, we can ask: does the same author write differently depending on who they're writing to? Below, each group of bars represents one author's average morphological profile when writing to recipients in different network communities.</p>
+<p class="section-intro">This is the letter-level question. When the same author writes to different people, does their Latin measurably change? Below, each chart shows one author's per-recipient morphological profile. Each bar = that author's average passive ratio in letters to one specific recipient. The spread between bars is the evidence for code-switching.</p>
 
-<div class="box full">
-  <button class="fs-btn" onclick="toggleFS(this)">&#x26F6; Fullscreen</button>
-  <div class="box-title">Within-Author Morphological Variation by Recipient Community</div>
-  <div class="box-q">When the same author writes to recipients in different social circles, does their Latin change?</div>
-  <canvas id="codeSwitchChart" style="max-height:500px"></canvas>
-  <div class="interp">
-    <strong>What you're seeing:</strong> For each author, the bars show their average passive voice ratio when writing to recipients in different network communities (identified by Louvain community detection). If the bars are roughly equal, the author writes the same way to everyone. If they vary, that's evidence of morphological code-switching. <strong>Key findings:</strong> Gregory the Great (7 communities) shows the widest variation; Pliny is more consistent. The community numbers are arbitrary identifiers &mdash; what matters is the <em>spread</em> between them.
-  </div>
-</div>
+<div id="codeSwitchPanels"></div>
 
 <!-- ==================== SECTION 4 ==================== -->
 <h3>4. Full Data: All Collections</h3>
@@ -352,27 +344,63 @@ new Chart(document.getElementById('radarBridge'), {
       pointLabels: { color: '#8a8578', font: { size: 11 } }, ticks: { display: false } } } }
 });
 
-// ==================== CODE-SWITCHING ====================
-const csAuthors = Object.keys(D.code_switch).sort((a,b) => Object.keys(D.code_switch[b]).length - Object.keys(D.code_switch[a]).length);
-const csLabels = [];
-const csData = [];
-const csColors = [];
-csAuthors.forEach(author => {
-  const comms = D.code_switch[author];
-  Object.entries(comms).forEach(([comm, vals]) => {
-    csLabels.push(`${author.substring(0,15)} → C${comm}`);
-    csData.push(vals.p);
-    csColors.push(CC[Object.keys(D.colls).find(k => CL(k).toLowerCase().includes(author.split(' ')[0].toLowerCase())) || ''] || '#888');
-  });
-  csLabels.push(''); csData.push(null); csColors.push('transparent'); // spacer
+// ==================== CODE-SWITCHING: per-author panels ====================
+const csPanel = document.getElementById('codeSwitchPanels');
+const csOrder = Object.keys(D.code_switch).sort((a,b) => {
+  const sa = D.code_switch[a].recipients.reduce((s,r) => s+r.n, 0);
+  const sb = D.code_switch[b].recipients.reduce((s,r) => s+r.n, 0);
+  return sb - sa;
 });
 
-new Chart(document.getElementById('codeSwitchChart'), {
-  type: 'bar',
-  data: { labels: csLabels, datasets: [{ data: csData, backgroundColor: csColors.map(c => c+'aa'), borderColor: csColors, borderWidth: 1 }] },
-  options: { responsive: true, plugins: { legend: { display: false } },
-    scales: { x: { ticks: { font: { size: 8 }, maxRotation: 55 }, grid: { display: false } },
-      y: { title: { display: true, text: 'Passive Ratio', color: '#6b6560' }, grid: { color: '#1e1e1e' }, min: 0, max: 0.55 } } }
+csOrder.forEach((coll, ci) => {
+  const cs = D.code_switch[coll];
+  const recips = cs.recipients;
+  const passVals = recips.map(r => r.avg_p);
+  const spread = (Math.max(...passVals) - Math.min(...passVals));
+
+  const div = document.createElement('div');
+  div.className = 'box full';
+  div.style.marginBottom = '2rem';
+  div.innerHTML = `
+    <button class="fs-btn" onclick="toggleFS(this)">⛶ Fullscreen</button>
+    <div class="box-title">${cs.author} <span style="color:#6b6560;font-size:0.82rem">(${cs.total_recipients} recipients, passive spread: ${(spread*100).toFixed(1)} points)</span></div>
+    <div class="box-q">Does ${cs.author.split(' ')[0]} shift morphological register depending on who they're writing to?</div>
+    <canvas id="cs_${ci}" style="min-height:250px"></canvas>
+    <div class="interp">
+      <strong>Passive ratio spread: ${(spread*100).toFixed(1)} percentage points.</strong>
+      Lowest: ${recips[passVals.indexOf(Math.min(...passVals))].name} (${Math.min(...passVals).toFixed(3)}).
+      Highest: ${recips[passVals.indexOf(Math.max(...passVals))].name} (${Math.max(...passVals).toFixed(3)}).
+      ${spread > 0.15 ? '<em>This is a large spread — strong evidence of register-shifting by recipient.</em>' :
+        spread > 0.08 ? '<em>Moderate spread — some evidence of recipient-conditioned variation.</em>' :
+        '<em>Narrow spread — this author writes relatively consistently regardless of recipient.</em>'}
+    </div>
+  `;
+  csPanel.appendChild(div);
+
+  const labels = recips.map(r => `${r.name.substring(0,25)}${r.role ? ' ('+r.role+')' : ''} [n=${r.n}]`);
+  const color = CC[coll] || '#c9a96e';
+
+  new Chart(document.getElementById(`cs_${ci}`), {
+    type: 'bar',
+    data: { labels,
+      datasets: [
+        { label: 'Passive Ratio', data: recips.map(r => r.avg_p),
+          backgroundColor: recips.map(r => {
+            const t = spread > 0 ? (r.avg_p - Math.min(...passVals)) / spread : 0.5;
+            return `rgba(${Math.round(100+t*155)}, ${Math.round(110-t*40)}, ${Math.round(80+t*30)}, 0.8)`;
+          }),
+          borderColor: color, borderWidth: 1 },
+        { label: 'Nominal Ratio', data: recips.map(r => r.avg_n),
+          backgroundColor: '#6ea8c944', borderColor: '#6ea8c9', borderWidth: 1 }
+      ]},
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
+      scales: {
+        x: { ticks: { font: { size: 8 }, maxRotation: 55 }, grid: { display: false } },
+        y: { title: { display: true, text: 'Ratio', color: '#6b6560' }, grid: { color: '#1e1e1e' }, min: 0, max: 0.65 }
+      }
+    }
+  });
 });
 
 // ==================== COLLECTION TABLE ====================
