@@ -187,6 +187,7 @@ Chart.defaults.color = '#8a8578';
 Chart.defaults.borderColor = '#2a2a2a';
 Chart.defaults.font.family = 'Georgia, serif';
 Chart.defaults.font.size = 11;
+Chart.defaults.animation = false;
 
 // Color palette
 const PAL = ['#e07b54','#d4633a','#c9a96e','#a8c06e','#6ec9a8','#6ea8c9','#8a6ec9','#c96ea8','#c96e6e','#7a8a9a',
@@ -205,26 +206,11 @@ const interpTexts = {
 
 // ==================== SCATTER ====================
 let scatterChart;
-// Pre-sample scatter: max 30 per collection to keep chart responsive
-const sampledScatter = (() => {
-  const byColl = {};
-  D.scatter.forEach(s => { (byColl[s.c] = byColl[s.c] || []).push(s); });
-  const out = [];
-  for (const [c, pts] of Object.entries(byColl)) {
-    if (pts.length <= 30) { out.push(...pts); continue; }
-    // Stratified sample: sort by metric, take evenly spaced
-    const sorted = [...pts].sort((a,b) => a.p - b.p);
-    const step = sorted.length / 30;
-    for (let i = 0; i < 30; i++) out.push(sorted[Math.floor(i * step)]);
-  }
-  return out;
-})();
-
 function buildScatter(metric) {
   const yLabels = { p: 'Passive Ratio', n: 'Nominal Ratio', s: 'Subjunctive Ratio', r: 'Preposition Density' };
   const datasets = [];
   collKeys.forEach(k => {
-    const pts = sampledScatter.filter(s => s.c === k).map(s => ({x: s.y, y: s[metric]}));
+    const pts = D.scatter.filter(s => s.c === k).map(s => ({x: s.y, y: s[metric]}));
     if (pts.length) datasets.push({ label: CL(k), data: pts, backgroundColor: CC[k]+'77', borderColor: CC[k]+'00', pointRadius: 3, pointHoverRadius: 5, showLine: false });
   });
   datasets.push({ label: 'Collection mean', data: collKeys.map(k => ({x: D.colls[k].year, y: D.colls[k][metric === 'n' ? 'n_r' : metric]})),
@@ -244,7 +230,7 @@ function updateScatter() {
 const init = buildScatter('p');
 scatterChart = new Chart(document.getElementById('mainScatter'), {
   type: 'scatter', data: { datasets: init.datasets },
-  options: { responsive: true, animation: false, maintainAspectRatio: false,
+  options: { responsive: true, maintainAspectRatio: true,
     plugins: { legend: { display: false }, tooltip: { enabled: false } },
     scales: { x: { title: { display: true, text: 'Year', color: '#6b6560' }, grid: { color: '#1e1e1e' } },
       y: { title: { display: true, text: init.yLabel, color: '#6b6560' }, grid: { color: '#1e1e1e' }, min: 0 } }
@@ -359,7 +345,7 @@ new Chart(document.getElementById('radarBridge'), {
       pointLabels: { color: '#8a8578', font: { size: 11 } }, ticks: { display: false } } } }
 });
 
-// ==================== CODE-SWITCHING: per-author panels ====================
+// ==================== CODE-SWITCHING: per-author panels (lazy-loaded) ====================
 const csPanel = document.getElementById('codeSwitchPanels');
 const csOrder = Object.keys(D.code_switch).sort((a,b) => {
   const sa = D.code_switch[a].recipients.reduce((s,r) => s+r.n, 0);
@@ -367,31 +353,11 @@ const csOrder = Object.keys(D.code_switch).sort((a,b) => {
   return sb - sa;
 });
 
-csOrder.forEach((coll, ci) => {
+function renderCSChart(ci, coll) {
   const cs = D.code_switch[coll];
   const recips = cs.recipients;
   const passVals = recips.map(r => r.avg_p);
-  const spread = (Math.max(...passVals) - Math.min(...passVals));
-
-  const div = document.createElement('div');
-  div.className = 'box full';
-  div.style.marginBottom = '2rem';
-  div.innerHTML = `
-    <button class="fs-btn" onclick="toggleFS(this)">⛶ Fullscreen</button>
-    <div class="box-title">${cs.author} <span style="color:#6b6560;font-size:0.82rem">(${cs.total_recipients} recipients, passive spread: ${(spread*100).toFixed(1)} points)</span></div>
-    <div class="box-q">Does ${cs.author.split(' ')[0]} shift morphological register depending on who they're writing to?</div>
-    <canvas id="cs_${ci}" style="min-height:250px"></canvas>
-    <div class="interp">
-      <strong>Passive ratio spread: ${(spread*100).toFixed(1)} percentage points.</strong>
-      Lowest: ${recips[passVals.indexOf(Math.min(...passVals))].name} (${Math.min(...passVals).toFixed(3)}).
-      Highest: ${recips[passVals.indexOf(Math.max(...passVals))].name} (${Math.max(...passVals).toFixed(3)}).
-      ${spread > 0.15 ? '<em>This is a large spread — strong evidence of register-shifting by recipient.</em>' :
-        spread > 0.08 ? '<em>Moderate spread — some evidence of recipient-conditioned variation.</em>' :
-        '<em>Narrow spread — this author writes relatively consistently regardless of recipient.</em>'}
-    </div>
-  `;
-  csPanel.appendChild(div);
-
+  const spread = Math.max(...passVals) - Math.min(...passVals);
   const labels = recips.map(r => `${r.name.substring(0,25)}${r.role ? ' ('+r.role+')' : ''} [n=${r.n}]`);
   const color = CC[coll] || '#c9a96e';
 
@@ -408,7 +374,7 @@ csOrder.forEach((coll, ci) => {
         { label: 'Nominal Ratio', data: recips.map(r => r.avg_n),
           backgroundColor: '#6ea8c944', borderColor: '#6ea8c9', borderWidth: 1 }
       ]},
-    options: { responsive: true, maintainAspectRatio: false,
+    options: { responsive: true, maintainAspectRatio: true,
       plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
       scales: {
         x: { ticks: { font: { size: 8 }, maxRotation: 55 }, grid: { display: false } },
@@ -416,7 +382,51 @@ csOrder.forEach((coll, ci) => {
       }
     }
   });
+}
+
+// Build DOM for all panels, but defer chart rendering
+csOrder.forEach((coll, ci) => {
+  const cs = D.code_switch[coll];
+  const recips = cs.recipients;
+  const passVals = recips.map(r => r.avg_p);
+  const spread = Math.max(...passVals) - Math.min(...passVals);
+
+  const div = document.createElement('div');
+  div.className = 'box full';
+  div.style.marginBottom = '2rem';
+  div.dataset.csColl = coll;
+  div.dataset.csIdx = ci;
+  div.innerHTML = `
+    <button class="fs-btn" onclick="toggleFS(this)">⛶ Fullscreen</button>
+    <div class="box-title">${cs.author} <span style="color:#6b6560;font-size:0.82rem">(${cs.total_recipients} recipients, passive spread: ${(spread*100).toFixed(1)} points)</span></div>
+    <div class="box-q">Does ${cs.author.split(' ')[0]} shift morphological register depending on who they're writing to?</div>
+    <canvas id="cs_${ci}"></canvas>
+    <div class="interp">
+      <strong>Passive ratio spread: ${(spread*100).toFixed(1)} percentage points.</strong>
+      Lowest: ${recips[passVals.indexOf(Math.min(...passVals))].name} (${Math.min(...passVals).toFixed(3)}).
+      Highest: ${recips[passVals.indexOf(Math.max(...passVals))].name} (${Math.max(...passVals).toFixed(3)}).
+      ${spread > 0.15 ? '<em>This is a large spread — strong evidence of register-shifting by recipient.</em>' :
+        spread > 0.08 ? '<em>Moderate spread — some evidence of recipient-conditioned variation.</em>' :
+        '<em>Narrow spread — this author writes relatively consistently regardless of recipient.</em>'}
+    </div>
+  `;
+  csPanel.appendChild(div);
 });
+
+// Lazy-load: render charts only when scrolled into view
+const csObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const el = entry.target;
+      const ci = parseInt(el.dataset.csIdx);
+      const coll = el.dataset.csColl;
+      renderCSChart(ci, coll);
+      csObserver.unobserve(el);
+    }
+  });
+}, { rootMargin: '200px' });
+
+document.querySelectorAll('[data-cs-coll]').forEach(el => csObserver.observe(el));
 
 // ==================== COLLECTION TABLE ====================
 const ctEl = document.getElementById('collTable');
