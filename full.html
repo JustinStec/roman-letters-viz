@@ -77,7 +77,7 @@
   <div class="box full">
     <button class="fs-btn" onclick="toggleFS(this)">&#x26F6; Fullscreen</button>
     <div class="box-title">Every Letter in the Corpus <select class="metric-select" id="metricSelect" onchange="updateScatter()"><option value="p">Passive Voice Ratio</option><option value="n">Nominal Ratio (Nouns/Verbs)</option><option value="s">Subjunctive Ratio</option><option value="r">Preposition Density</option></select></div>
-    <div class="box-q">What does the morphological landscape look like across 700 years? Click author names below to show/hide.</div>
+    <div class="box-q">~30 letters sampled per collection (stratified to preserve distribution shape). Click author names to show/hide.</div>
     <div class="author-legend" id="authorLegend"></div>
     <canvas id="mainScatter"></canvas>
     <div class="interp" id="scatterInterp">
@@ -205,12 +205,27 @@ const interpTexts = {
 
 // ==================== SCATTER ====================
 let scatterChart;
+// Pre-sample scatter: max 30 per collection to keep chart responsive
+const sampledScatter = (() => {
+  const byColl = {};
+  D.scatter.forEach(s => { (byColl[s.c] = byColl[s.c] || []).push(s); });
+  const out = [];
+  for (const [c, pts] of Object.entries(byColl)) {
+    if (pts.length <= 30) { out.push(...pts); continue; }
+    // Stratified sample: sort by metric, take evenly spaced
+    const sorted = [...pts].sort((a,b) => a.p - b.p);
+    const step = sorted.length / 30;
+    for (let i = 0; i < 30; i++) out.push(sorted[Math.floor(i * step)]);
+  }
+  return out;
+})();
+
 function buildScatter(metric) {
   const yLabels = { p: 'Passive Ratio', n: 'Nominal Ratio', s: 'Subjunctive Ratio', r: 'Preposition Density' };
   const datasets = [];
   collKeys.forEach(k => {
-    const pts = D.scatter.filter(s => s.c === k).map(s => ({x: s.y, y: s[metric]}));
-    if (pts.length) datasets.push({ label: CL(k), data: pts, backgroundColor: CC[k]+'66', borderColor: CC[k]+'00', pointRadius: 2.5, pointHoverRadius: 5, showLine: false });
+    const pts = sampledScatter.filter(s => s.c === k).map(s => ({x: s.y, y: s[metric]}));
+    if (pts.length) datasets.push({ label: CL(k), data: pts, backgroundColor: CC[k]+'77', borderColor: CC[k]+'00', pointRadius: 3, pointHoverRadius: 5, showLine: false });
   });
   datasets.push({ label: 'Collection mean', data: collKeys.map(k => ({x: D.colls[k].year, y: D.colls[k][metric === 'n' ? 'n_r' : metric]})),
     borderColor: '#c9a96e66', borderWidth: 2, borderDash: [5,3], pointRadius: 4, pointBackgroundColor: '#c9a96e', showLine: true, tension: 0.35, fill: false });
@@ -230,7 +245,7 @@ const init = buildScatter('p');
 scatterChart = new Chart(document.getElementById('mainScatter'), {
   type: 'scatter', data: { datasets: init.datasets },
   options: { responsive: true, animation: false, maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
+    plugins: { legend: { display: false }, tooltip: { enabled: false } },
     scales: { x: { title: { display: true, text: 'Year', color: '#6b6560' }, grid: { color: '#1e1e1e' } },
       y: { title: { display: true, text: init.yLabel, color: '#6b6560' }, grid: { color: '#1e1e1e' }, min: 0 } }
   }
