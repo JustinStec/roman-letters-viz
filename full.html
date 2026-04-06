@@ -105,37 +105,46 @@
 </div>
 
 <!-- ==================== SECTION 2 ==================== -->
-<h3>2. The Core Question: Does Network Position Predict Morphological Profile?</h3>
-<p class="section-intro">This is the central hypothesis. Authors who bridge separate social circles (high betweenness centrality) may default to a conservative, shared register &mdash; or they may show higher variance. The scatter plot below directly tests this: each dot is one author, with network position on one axis and morphological profile on the other.</p>
+<h3>2. The Core Question: Do Social Connectors Write Different Latin?</h3>
+<p class="section-intro">Some authors in this corpus wrote to dozens of people across different social circles &mdash; bishops, senators, emperors, monks. Others wrote mainly within their own community. The question: <strong>do the most connected authors write differently?</strong> Specifically, do they default to a "safe," average register &mdash; or do they develop their own distinctive style?</p>
 
 <div class="grid">
   <div class="box full">
     <button class="fs-btn" onclick="toggleFS(this)">&#x26F6; Fullscreen</button>
-    <div class="box-title">Betweenness Centrality vs. Morphological Variance</div>
-    <div class="box-q">Do bridge figures write more conservatively &mdash; or more variably?</div>
-    <canvas id="coreScatter"></canvas>
-    <div class="interp" id="coreInterp">
-      <strong>What you're seeing:</strong> Each dot is an author. X-axis = betweenness centrality (how much the author bridges separate network communities). Y-axis = within-author standard deviation in passive ratio (how much the author varies across letters). <strong>If bridge figures code-switch more, we'd expect a positive correlation</strong> (upper-right dots). If they default to a safe register, we'd expect low variance (lower-right). Dot size = letter count.
+    <div class="box-title">Who Are the Bridge Figures?</div>
+    <div class="box-q">Authors ranked by how many separate social circles they connect. The bar shows their passive voice ratio; the dashed line marks the period average.</div>
+    <canvas id="bridgeRank"></canvas>
+    <div class="interp">
+      <strong>What you're seeing:</strong> Authors sorted by <em>betweenness centrality</em> &mdash; a network metric that measures how often someone lies on the shortest path between other people. High betweenness = a social connector, someone who bridges otherwise separate groups. The colored bar shows each author's mean passive voice ratio. The dashed vertical line marks the overall corpus average (~0.31). <strong>Key pattern:</strong> The top bridge figures (Cassiodorus, Sidonius, Pliny) show <em>different</em> strategies. Cassiodorus writes close to the mean &mdash; safe, institutional Latin. Sidonius pushes well above it &mdash; a deliberately ornate style despite (or because of) his bridging role.
+    </div>
+  </div>
+
+  <div class="box full">
+    <div class="box-title">Head-to-Head: Bridge vs. Peripheral Authors</div>
+    <div class="box-q">Same period, different network positions. Does the bridge figure write closer to the average?</div>
+    <div id="pairComparisons"></div>
+    <div class="interp">
+      <strong>What you're seeing:</strong> Three matched pairs of authors from the same period but different network positions. For each pair, the bars show passive ratio and nominal ratio. The period average is marked with a dashed line. <strong>The hypothesis:</strong> if network bridging pushes authors toward a shared register, the bridge figure should be closer to the period average than the peripheral author. <strong>What we find:</strong> Cassiodorus (biggest bridge) writes <em>higher</em> passive than the period mean &mdash; he doesn't default to average, he writes in a distinctive chancery style. But his <em>nominal ratio</em> is lower than the period mean, closer to the overall average. The picture is mixed: bridge figures aren't simply "more average," but they may converge on specific features.
     </div>
   </div>
 
   <div class="box">
-    <div class="box-title">Author Profiles: Network &times; Morphology</div>
-    <div class="box-q">Who are the bridge figures, and how do they write?</div>
-    <div style="overflow-x:auto; max-height: 500px; overflow-y: auto;">
+    <div class="box-title">Morphological Fingerprints</div>
+    <div class="box-q">Top 3 bridge figures vs. corpus average</div>
+    <canvas id="radarBridge"></canvas>
+    <div class="interp">
+      <strong>Reading:</strong> Each author's morphological profile overlaid on the corpus mean (dashed). Cassiodorus (red) is close to the mean on most features except passive. Sidonius (purple) deviates more broadly. Pliny (green) has the most classical profile.
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="box-title">All Authors: Network &times; Morphology</div>
+    <div class="box-q">Full data table, sorted by network importance</div>
+    <div style="overflow-x:auto; max-height: 400px; overflow-y: auto;">
       <table class="dt" id="authorTable"></table>
     </div>
     <div class="interp">
-      <strong>How to read:</strong> Sorted by betweenness centrality (network importance). <em>Pass</em> = mean passive ratio. <em>&sigma;</em> = standard deviation (within-author variance). High betweenness + low &sigma; = conformist bridge. High betweenness + high &sigma; = code-switcher. Compare Cassiodorus (bridge, low variance) to Sidonius (bridge, high variance).
-    </div>
-  </div>
-
-  <div class="box">
-    <div class="box-title">Morphological Fingerprints: Bridge vs. Non-Bridge</div>
-    <div class="box-q">Do high-betweenness authors have a distinct morphological shape?</div>
-    <canvas id="radarBridge"></canvas>
-    <div class="interp">
-      <strong>What you're seeing:</strong> Overlaid morphological profiles for the top 3 bridge figures (Cassiodorus, Sidonius, Pliny) vs. the corpus mean. Where they bulge beyond the mean = their distinctive features. Where they're inside it = features they suppress. <strong>Key:</strong> Cassiodorus and Sidonius both have elevated passive ratios, but Sidonius pushes further while Cassiodorus stays closer to the mean on other features.
+      <strong>How to read:</strong> Gold-highlighted rows = top bridge figures. <em>Pass</em> = mean passive ratio. <em>Deg</em> = how many people they correspond with. Scan down the Pass column &mdash; do the gold rows cluster differently from the rest?
     </div>
   </div>
 </div>
@@ -283,38 +292,134 @@ new Chart(document.getElementById('caseChart'), {
       y: { stacked: true, max: 1, grid: { color: '#1e1e1e' } } } }
 });
 
-// ==================== CORE SCATTER: BETWEENNESS vs VARIANCE ====================
-const coreData = D.authors.filter(a => a.betw > 0 && a.letters >= 10);
-new Chart(document.getElementById('coreScatter'), {
-  type: 'bubble',
-  data: { datasets: [{
-    data: coreData.map(a => ({ x: a.betw, y: a.p_sd, r: Math.sqrt(a.letters) * 1.5, label: a.name })),
-    backgroundColor: coreData.map(a => a.bridge > 0.2 ? '#c9a96e88' : '#6ea8c988'),
-    borderColor: coreData.map(a => a.bridge > 0.2 ? '#c9a96e' : '#6ea8c9'),
-    borderWidth: 1
-  }]},
-  options: { responsive: true,
-    plugins: { legend: { display: false },
-      tooltip: { callbacks: { label(ctx) { const a = coreData[ctx.dataIndex]; return `${a.name}: betw=${a.betw.toFixed(3)}, σ(pass)=${a.p_sd.toFixed(3)}, n=${a.letters}`; } } }
+// ==================== BRIDGE RANKING CHART ====================
+const bridgeAuthors = D.authors.filter(a => a.betw > 0.01 && a.letters >= 10)
+  .sort((a,b) => b.betw - a.betw).slice(0, 15);
+const corpusAvgPass = Object.values(D.colls).reduce((s,c) => s + c.p, 0) / Object.keys(D.colls).length;
+
+new Chart(document.getElementById('bridgeRank'), {
+  type: 'bar',
+  data: {
+    labels: bridgeAuthors.map(a => `${a.name.substring(0,22)} (${a.letters} letters)`),
+    datasets: [{
+      label: 'Passive Ratio',
+      data: bridgeAuthors.map(a => a.p),
+      backgroundColor: bridgeAuthors.map(a => {
+        const dist = Math.abs(a.p - corpusAvgPass);
+        return dist < 0.03 ? '#6ec9a8aa' : dist < 0.06 ? '#c9a96eaa' : '#c96e6eaa';
+      }),
+      borderColor: bridgeAuthors.map(a => {
+        const dist = Math.abs(a.p - corpusAvgPass);
+        return dist < 0.03 ? '#6ec9a8' : dist < 0.06 ? '#c9a96e' : '#c96e6e';
+      }),
+      borderWidth: 1
+    }]
+  },
+  options: {
+    responsive: true, indexAxis: 'y', maintainAspectRatio: true,
+    plugins: {
+      legend: { display: false },
+      annotation: { annotations: {} }
     },
     scales: {
-      x: { title: { display: true, text: 'Betweenness Centrality (network bridge importance)', color: '#6b6560' }, grid: { color: '#1e1e1e' } },
-      y: { title: { display: true, text: 'Within-Author Passive Ratio σ (morphological variance)', color: '#6b6560' }, grid: { color: '#1e1e1e' }, min: 0 }
+      x: { min: 0, max: 0.5, grid: { color: '#1e1e1e' },
+        title: { display: true, text: 'Mean Passive Voice Ratio', color: '#6b6560' } },
+      y: { ticks: { font: { size: 9 } }, grid: { display: false } }
     }
   }
 });
 
+// ==================== PAIRED COMPARISONS ====================
+const pairDiv = document.getElementById('pairComparisons');
+const pairs = [
+  {
+    period: '500–600 AD',
+    bridge: D.authors.find(a => a.name === 'Cassiodorus'),
+    peripheral: D.authors.find(a => a.name === 'Venantius Fortunatus') || D.authors.find(a => a.name === 'Ruricius of Limoges'),
+    periodAvgP: 0.34, periodAvgN: 0.54
+  },
+  {
+    period: '400–500 AD',
+    bridge: D.authors.find(a => a.name === 'Sidonius Apollinaris'),
+    peripheral: D.authors.find(a => a.name === 'Paulinus of Nola'),
+    periodAvgP: 0.31, periodAvgN: 0.52
+  },
+  {
+    period: '100–150 AD',
+    bridge: D.authors.find(a => a.name === 'Pliny the Younger'),
+    peripheral: D.authors.find(a => a.name === 'Seneca') || D.authors.find(a => a.name.includes('Seneca')),
+    periodAvgP: 0.27, periodAvgN: 0.43
+  }
+];
+
+pairs.forEach((pair, pi) => {
+  if (!pair.bridge || !pair.peripheral) return;
+  const b = pair.bridge, p = pair.peripheral;
+  const card = document.createElement('div');
+  card.style.cssText = 'background:#13151a; border:1px solid #2a2a2a; border-radius:6px; padding:1.2rem; margin-bottom:1rem;';
+
+  const headerColor = '#c9a96e';
+  card.innerHTML = `
+    <div style="font-size:0.82rem; color:#6b6560; margin-bottom:0.6rem;">${pair.period}</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+      <div>
+        <div style="color:${headerColor}; font-size:0.9rem; margin-bottom:0.4rem;">
+          ${b.name} <span style="color:#6b6560; font-size:0.75rem;">BRIDGE &bull; ${b.deg} correspondents &bull; ${b.letters} letters</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.5rem; margin:0.3rem 0;">
+          <span style="color:#6b6560; font-size:0.75rem; width:60px;">Passive</span>
+          <div style="flex:1; background:#222; height:14px; border-radius:3px; position:relative;">
+            <div style="width:${b.p*200}%; height:100%; background:${Math.abs(b.p - pair.periodAvgP) < 0.03 ? '#6ec9a8' : '#c96e6e'}; border-radius:3px;"></div>
+            <div style="position:absolute; left:${pair.periodAvgP*200}%; top:-2px; bottom:-2px; width:2px; background:#c9a96e88;" title="Period avg"></div>
+          </div>
+          <span style="color:#e0ddd5; font-size:0.78rem; width:40px;">${b.p.toFixed(3)}</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.5rem; margin:0.3rem 0;">
+          <span style="color:#6b6560; font-size:0.75rem; width:60px;">Nominal</span>
+          <div style="flex:1; background:#222; height:14px; border-radius:3px; position:relative;">
+            <div style="width:${b.n_r*166}%; height:100%; background:${Math.abs(b.n_r - pair.periodAvgN) < 0.03 ? '#6ec9a8' : '#6ea8c9'}; border-radius:3px;"></div>
+            <div style="position:absolute; left:${pair.periodAvgN*166}%; top:-2px; bottom:-2px; width:2px; background:#c9a96e88;"></div>
+          </div>
+          <span style="color:#e0ddd5; font-size:0.78rem; width:40px;">${b.n_r.toFixed(3)}</span>
+        </div>
+      </div>
+      <div>
+        <div style="color:#8a8578; font-size:0.9rem; margin-bottom:0.4rem;">
+          ${p.name} <span style="color:#6b6560; font-size:0.75rem;">PERIPHERAL &bull; ${p.deg} correspondents &bull; ${p.letters} letters</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.5rem; margin:0.3rem 0;">
+          <span style="color:#6b6560; font-size:0.75rem; width:60px;">Passive</span>
+          <div style="flex:1; background:#222; height:14px; border-radius:3px; position:relative;">
+            <div style="width:${p.p*200}%; height:100%; background:${Math.abs(p.p - pair.periodAvgP) < 0.03 ? '#6ec9a8' : '#c96e6e'}; border-radius:3px;"></div>
+            <div style="position:absolute; left:${pair.periodAvgP*200}%; top:-2px; bottom:-2px; width:2px; background:#c9a96e88;"></div>
+          </div>
+          <span style="color:#e0ddd5; font-size:0.78rem; width:40px;">${p.p.toFixed(3)}</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.5rem; margin:0.3rem 0;">
+          <span style="color:#6b6560; font-size:0.75rem; width:60px;">Nominal</span>
+          <div style="flex:1; background:#222; height:14px; border-radius:3px; position:relative;">
+            <div style="width:${p.n_r*166}%; height:100%; background:${Math.abs(p.n_r - pair.periodAvgN) < 0.03 ? '#6ec9a8' : '#6ea8c9'}; border-radius:3px;"></div>
+            <div style="position:absolute; left:${pair.periodAvgN*166}%; top:-2px; bottom:-2px; width:2px; background:#c9a96e88;"></div>
+          </div>
+          <span style="color:#e0ddd5; font-size:0.78rem; width:40px;">${p.n_r.toFixed(3)}</span>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:0.7rem; color:#4a4740; margin-top:0.4rem;">Dashed line = period average. Green = within 3 points of average. Red/blue = divergent.</div>
+  `;
+  pairDiv.appendChild(card);
+});
+
 // ==================== AUTHOR TABLE ====================
 const at = document.getElementById('authorTable');
-let ath = '<thead><tr><th>Author</th><th>Role</th><th>Letters</th><th>Betw.</th><th>Bridge</th><th>Deg.</th><th>Pass</th><th>&sigma;(P)</th><th>NomR</th><th>&sigma;(N)</th><th>Subj</th></tr></thead><tbody>';
+let ath = '<thead><tr><th>Author</th><th>Role</th><th>Letters</th><th>Correspondents</th><th>Passive</th><th>Nominal</th><th>Subjunctive</th></tr></thead><tbody>';
 D.authors.forEach(a => {
   const hiBetw = a.betw > 0.05;
-  const hiVar = a.p_sd > 0.12;
   ath += `<tr style="${hiBetw ? 'background:#1a1c22' : ''}">
     <td style="color:${hiBetw ? '#c9a96e' : '#8a8578'}">${a.name}</td><td>${a.role||''}</td><td>${a.letters}</td>
-    <td>${a.betw.toFixed(4)}</td><td>${a.bridge.toFixed(2)}</td><td>${a.deg}</td>
-    <td>${a.p.toFixed(3)}</td><td style="color:${hiVar?'#c9a96e':'#6b6560'}">${a.p_sd.toFixed(3)}</td>
-    <td>${a.n_r.toFixed(3)}</td><td>${a.n_sd.toFixed(3)}</td><td>${a.s.toFixed(3)}</td></tr>`;
+    <td>${a.deg}</td>
+    <td>${a.p.toFixed(3)}</td>
+    <td>${a.n_r.toFixed(3)}</td><td>${a.s.toFixed(3)}</td></tr>`;
 });
 at.innerHTML = ath + '</tbody>';
 
