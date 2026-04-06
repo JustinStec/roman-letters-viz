@@ -36,7 +36,7 @@
 
   /* Letter panel */
   #letterPanel {
-    position: fixed; top: 0; right: -520px; width: 500px; height: 100vh;
+    position: fixed; top: 0; right: -660px; width: 640px; height: 100vh;
     background: #14161c; border-left: 2px solid #c9a96e33;
     box-shadow: -8px 0 30px rgba(0,0,0,0.5);
     transition: right 0.3s ease; z-index: 1000;
@@ -58,9 +58,26 @@
   }
   #letterPanel .close-btn:hover { border-color: #c9a96e; color: #c9a96e; }
   #letterPanel .panel-morph {
-    padding: 1rem 1.5rem; background: #1a1c22;
+    padding: 0; background: #1a1c22;
     border-bottom: 1px solid #2a2a2a; flex-shrink: 0;
+    overflow: hidden;
   }
+  #letterPanel .panel-morph .morph-inner {
+    padding: 0.8rem 1.5rem;
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+  #letterPanel .panel-morph.expanded .morph-inner {
+    max-height: 600px;
+  }
+  .morph-toggle {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.6rem 1.5rem; cursor: pointer; user-select: none;
+    font-size: 0.78rem; color: #8a8578;
+  }
+  .morph-toggle:hover { color: #c9a96e; }
+  .morph-toggle .arrow { transition: transform 0.3s; font-size: 0.6rem; }
+  .panel-morph.expanded .morph-toggle .arrow { transform: rotate(90deg); }
   .morph-section-title {
     color: #c9a96e; font-size: 0.72rem; text-transform: uppercase;
     letter-spacing: 0.08em; margin-top: 0.6rem; padding-bottom: 0.2rem;
@@ -74,7 +91,7 @@
   .mini-bar-val { width: 40px; font-size: 0.72rem; color: #8a8578; font-variant-numeric: tabular-nums; flex-shrink: 0; }
   #letterPanel .panel-body { padding: 1.5rem; overflow-y: auto; flex: 1; }
   #letterPanel .latin-text {
-    font-family: 'Georgia', serif; font-size: 0.88rem; line-height: 1.8;
+    font-family: 'Georgia', serif; font-size: 1rem; line-height: 1.85;
     color: #d0cdc5; white-space: pre-wrap; word-wrap: break-word;
   }
 
@@ -219,7 +236,9 @@ function openPanel(letter) {
       m += `<div class="mini-bar-row"><div class="mini-bar-label">${k}</div><div class="mini-bar-track"><div class="mini-bar-fill" style="width:${pct}%;background:#6b8a6e"></div></div><div class="mini-bar-val">${pct}%</div></div>`;
     }
   }
-  document.getElementById('panelMorph').innerHTML = m;
+  document.getElementById('panelMorph').innerHTML =
+    '<div class="morph-toggle" onclick="this.parentElement.classList.toggle(\'expanded\')"><span>Morphological Breakdown</span><span class="arrow">&#9654;</span></div>' +
+    '<div class="morph-inner">' + m + '</div>';
   document.getElementById('panelLatin').textContent = letter.latin || '(No Latin text available)';
   document.getElementById('letterPanel').classList.add('open');
   document.getElementById('overlay').classList.add('open');
