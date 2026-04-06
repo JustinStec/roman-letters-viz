@@ -19,8 +19,8 @@
   .box.full { grid-column: 1 / -1; }
   .box-title { font-size: 0.95rem; color: #c9a96e; margin-bottom: 0.15rem; }
   .box-q { font-size: 0.82rem; color: #b0a89e; font-style: italic; margin-bottom: 0.8rem; }
-  canvas { min-height: 350px; }
-  .full canvas { min-height: 500px; }
+  canvas { height: 350px; max-height: 400px; }
+  .full canvas { height: 400px; max-height: 450px; }
   .interp { font-size: 0.82rem; color: #9a9590; line-height: 1.7; margin-top: 0.8rem; padding: 0.7rem 1rem; background: #13151a; border-left: 2px solid #c9a96e44; border-radius: 0 4px 4px 0; }
   .interp strong { color: #c9a96e; } .interp em { color: #b0a89e; }
 
@@ -38,7 +38,7 @@
     z-index: 9999; border-radius: 0; padding: 2rem;
     overflow-y: auto; grid-column: 1 / -1;
   }
-  .box.fullscreen canvas { min-height: 80vh; }
+  .box.fullscreen canvas { height: 75vh; max-height: 80vh; }
   .box.fullscreen .fs-btn { top: 1rem; right: 1.5rem; font-size: 0.85rem; padding: 0.4rem 0.7rem; }
 
   /* Author filter legend */
