@@ -78,7 +78,7 @@
 <div class="grid">
   <div class="box full">
     <button class="fs-btn" onclick="toggleFS(this)">&#x26F6; Fullscreen</button>
-    <div class="box-title">Every Letter in the Corpus <select class="metric-select" id="metricSelect" onchange="updateScatter()"><option value="p">Passive Voice Ratio</option><option value="n">Nominal Ratio (Nouns/Verbs)</option><option value="s">Subjunctive Ratio</option><option value="r">Preposition Density</option></select></div>
+    <div class="box-title">Every Letter in the Corpus <select class="metric-select" id="metricSelect" onchange="updateScatter()"><option value="p">Passive Voice Ratio</option><option value="n">Nominal Ratio (Nouns/Verbs)</option><option value="s">Subjunctive Ratio</option><option value="r">Preposition Density</option><option value="p2">2nd Person Rate (Directness of Address)</option><option value="v">Vocative Rate</option></select></div>
     <div class="box-q">~30 letters sampled per collection (stratified to preserve distribution shape). Click author names to show/hide.</div>
     <div class="author-legend" id="authorLegend"></div>
     <canvas id="mainScatter"></canvas>
@@ -153,7 +153,7 @@
 
 <!-- ==================== SECTION 3 ==================== -->
 <h3>3. Code-Switching: Do Authors Shift Register by Recipient?</h3>
-<p class="section-intro">This is the letter-level question. When the same author writes to different people, does their Latin measurably change? Below, each chart shows one author's per-recipient morphological profile. Each bar = that author's average passive ratio in letters to one specific recipient. The spread between bars is the evidence for code-switching.</p>
+<p class="section-intro">This is the letter-level question. When the same author writes to different people, does their Latin measurably change? Each chart shows one author's per-recipient profile across <strong>four metrics</strong>: passive ratio, nominal ratio, subjunctive ratio, and 2nd-person rate (scaled ×5 for visibility). The 2nd-person rate is the <em>mode of address</em> metric &mdash; it measures how directly the author speaks to the recipient vs. writing impersonally. If the bars shift across recipients, that's code-switching.</p>
 
 <div id="codeSwitchPanels"></div>
 
@@ -213,6 +213,8 @@ const interpTexts = {
   n: '<strong>Nominal Ratio:</strong> Nouns / (Nouns + Verbs). Higher values = more static, noun-heavy prose. Rises from 0.35 (Cicero ad Atticum) to 0.61 (Pelagius I). Late antique Latin becomes increasingly nominal and abstract.',
   s: '<strong>Subjunctive Ratio:</strong> Share of finite verbs in the subjunctive mood. Indicates subordination density, indirect speech, and hypothetical reasoning. Relatively stable (~0.25&ndash;0.31) but Seneca is notably low (0.20) and Cicero ad Familiares notably high (0.32).',
   r: '<strong>Preposition Density:</strong> Prepositions per token. A proxy for analytic grammar (prepositions replacing case endings). Counter-intuitively, Cicero and Gregory show the <em>highest</em> values &mdash; informal and pastoral registers use more prepositional phrases than formal chancery style.',
+  p2: '<strong>2nd Person Rate:</strong> How often the author directly addresses the recipient (2nd-person verb forms per token). This is the core <em>mode of address</em> metric. Cicero averages 0.066 (highly direct, conversational I-you exchange). Papal letters average ~0.016 (impersonal, institutional, talking <em>about</em> rather than <em>to</em>). Cassiodorus is in between (0.031) &mdash; a bureaucrat who occasionally breaks into direct address. <strong>Key question:</strong> does the same author shift directness depending on recipient?',
+  v: '<strong>Vocative Rate:</strong> How often the author uses the vocative case (direct address forms like <em>mi Attice</em>, <em>frater carissime</em>). Very rare overall (&lt;2% of tokens) but varies significantly: Pliny and Venantius Fortunatus use vocatives 3&ndash;4x more than Cassiodorus or Symmachus. High vocative = personal, affectionate register.',
 };
 
 // ==================== SCATTER ====================
@@ -224,7 +226,9 @@ function buildScatter(metric) {
     const pts = D.scatter.filter(s => s.c === k).map(s => ({x: s.y, y: s[metric]}));
     if (pts.length) datasets.push({ label: CL(k), data: pts, backgroundColor: CC[k]+'77', borderColor: CC[k]+'00', pointRadius: 3, pointHoverRadius: 5, showLine: false });
   });
-  datasets.push({ label: 'Collection mean', data: collKeys.map(k => ({x: D.colls[k].year, y: D.colls[k][metric === 'n' ? 'n_r' : metric]})),
+  const metricMap = { n: 'n_r', p2: 'sr2', v: 'voc' };
+  const aggKey = metricMap[metric] || metric;
+  datasets.push({ label: 'Collection mean', data: collKeys.map(k => ({x: D.colls[k].year, y: D.colls[k][aggKey] || 0})),
     borderColor: '#c9a96e66', borderWidth: 2, borderDash: [5,3], pointRadius: 4, pointBackgroundColor: '#c9a96e', showLine: true, tension: 0.35, fill: false });
   return { datasets, yLabel: yLabels[metric] };
 }
@@ -472,17 +476,26 @@ function renderCSChart(ci, coll) {
     type: 'bar',
     data: { labels,
       datasets: [
-        { label: 'Passive Ratio', data: recips.map(r => r.avg_p),
+        { label: 'Passive', data: recips.map(r => r.avg_p),
           backgroundColor: recips.map(r => {
             const t = spread > 0 ? (r.avg_p - Math.min(...passVals)) / spread : 0.5;
             return `rgba(${Math.round(100+t*155)}, ${Math.round(110-t*40)}, ${Math.round(80+t*30)}, 0.8)`;
           }),
           borderColor: color, borderWidth: 1 },
-        { label: 'Nominal Ratio', data: recips.map(r => r.avg_n),
-          backgroundColor: '#6ea8c944', borderColor: '#6ea8c9', borderWidth: 1 }
+        { label: 'Nominal', data: recips.map(r => r.avg_n),
+          backgroundColor: '#6ea8c944', borderColor: '#6ea8c9', borderWidth: 1 },
+        { label: 'Subjunctive', data: recips.map(r => r.avg_s),
+          backgroundColor: '#8a6ec944', borderColor: '#8a6ec9', borderWidth: 1 },
+        { label: '2nd Person ×5', data: recips.map(r => (r.avg_sr2 || 0) * 5),
+          backgroundColor: '#c9a96e44', borderColor: '#c9a96e', borderWidth: 1 }
       ]},
     options: { responsive: true, maintainAspectRatio: true,
-      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
+        tooltip: { callbacks: { label(ctx) {
+          if (ctx.dataset.label === '2nd Person ×5') return `2nd Person: ${(ctx.raw / 5).toFixed(4)}`;
+          return `${ctx.dataset.label}: ${ctx.raw.toFixed(3)}`;
+        }}}
+      },
       scales: {
         x: { ticks: { font: { size: 8 }, maxRotation: 55 }, grid: { display: false } },
         y: { title: { display: true, text: 'Ratio', color: '#6b6560' }, grid: { color: '#1e1e1e' }, min: 0, max: 0.65 }
@@ -539,17 +552,17 @@ document.querySelectorAll('[data-cs-coll]').forEach(el => csObserver.observe(el)
 const ctEl = document.getElementById('collTable');
 function hc(v,mn,mx) { const t=mx===mn?0.5:(v-mn)/(mx-mn); return `rgb(${Math.round(30+t*170)},${Math.round(30+(1-Math.abs(t-0.5)*2)*80)},${Math.round(30+(1-t)*100)})`; }
 const rng = {};
-['p','n_r','s','r','nom','acc','abl','gen','dat'].forEach(k => {
+['p','n_r','s','r','nom','acc','abl','gen','dat','sr2','voc','p1','p2','p3'].forEach(k => {
   const vs = collKeys.map(c => D.colls[c][k] || 0);
   rng[k] = { min: Math.min(...vs), max: Math.max(...vs) };
 });
 
-let cth = '<thead><tr><th>Collection</th><th>N</th><th>Year</th><th>Pass%</th><th>σ(P)</th><th>NomR</th><th>Subj%</th><th>Prep</th><th>Nom%</th><th>Acc%</th><th>Abl%</th><th>Gen%</th><th>Dat%</th></tr></thead><tbody>';
+let cth = '<thead><tr><th>Collection</th><th>N</th><th>Year</th><th>Pass%</th><th>NomR</th><th>Subj%</th><th>Prep</th><th>2nd/Tok</th><th>Voc</th><th>1st P</th><th>2nd P</th><th>3rd P</th><th>Nom%</th><th>Acc%</th><th>Abl%</th></tr></thead><tbody>';
 collKeys.forEach(k => {
   const d = D.colls[k];
-  function cell(key) { return `<td style="background:${hc(d[key],rng[key].min,rng[key].max)};color:#e0ddd5;text-align:center">${d[key].toFixed(3)}</td>`; }
+  function cell(key) { const v = d[key] || 0; return `<td style="background:${hc(v,rng[key].min,rng[key].max)};color:#e0ddd5;text-align:center">${v.toFixed(3)}</td>`; }
   cth += `<tr><td style="color:#c9a96e">${CL(k)}</td><td>${d.n}</td><td>${d.year}</td>
-    ${cell('p')}<td>${d.p_sd.toFixed(3)}</td>${cell('n_r')}${cell('s')}${cell('r')}${cell('nom')}${cell('acc')}${cell('abl')}${cell('gen')}${cell('dat')}</tr>`;
+    ${cell('p')}${cell('n_r')}${cell('s')}${cell('r')}${cell('sr2')}${cell('voc')}${cell('p1')}${cell('p2')}${cell('p3')}${cell('nom')}${cell('acc')}${cell('abl')}</tr>`;
 });
 ctEl.innerHTML = cth + '</tbody>';
 </script>
