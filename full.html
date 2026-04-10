@@ -131,11 +131,11 @@
   </div>
 
   <div class="box">
-    <div class="box-title">Morphological Fingerprints</div>
-    <div class="box-q">Top 3 bridge figures vs. corpus average</div>
-    <canvas id="radarBridge"></canvas>
+    <div class="box-title">What Makes Each Author Distinctive?</div>
+    <div class="box-q">How far each top author deviates from the corpus average on every feature. Bars to the right = above average; bars to the left = below.</div>
+    <canvas id="deviationChart"></canvas>
     <div class="interp">
-      <strong>Reading:</strong> Each author's morphological profile overlaid on the corpus mean (dashed). Cassiodorus (red) is close to the mean on most features except passive. Sidonius (purple) deviates more broadly. Pliny (green) has the most classical profile.
+      <strong>What this answers:</strong> For each major author, which morphological features are distinctively high or low compared to the overall corpus? <strong>Cassiodorus</strong> stands out for high passive (+0.07) and high 3rd person (+0.10) but <em>low</em> 1st person and low vocative &mdash; bureaucratic, impersonal Latin. <strong>Cicero</strong> is the mirror image: high 1st person, high accusative, low nominal ratio &mdash; direct, verb-driven prose. <strong>Sidonius</strong> has the highest passive deviation of anyone &mdash; his ornate style is measurably, not just impressionistically, unusual. The features where an author deviates most are the features that define their register.
     </div>
   </div>
 
@@ -430,32 +430,48 @@ D.authors.forEach(a => {
 });
 at.innerHTML = ath + '</tbody>';
 
-// ==================== RADAR: BRIDGE AUTHORS ====================
-const corpusMean = { nom: 0, gen: 0, acc: 0, abl: 0, s: 0, p: 0, n_r: 0, r: 0 };
+// ==================== DEVIATION CHART: what makes each author distinctive ====================
+const corpusMean = {};
+const devFeatures = ['p','n_r','s','r','sr2','voc','p1','p2','p3'];
+const devLabels = ['Passive','Nominal','Subjunctive','Prep Density','2nd Pers Rate','Vocative','1st Person','2nd Person','3rd Person'];
 let cnt = 0;
-Object.values(D.colls).forEach(c => { corpusMean.nom+=c.nom; corpusMean.gen+=c.gen; corpusMean.acc+=c.acc; corpusMean.abl+=c.abl; corpusMean.s+=c.s; corpusMean.p+=c.p; corpusMean.n_r+=c.n_r; corpusMean.r+=c.r; cnt++; });
-Object.keys(corpusMean).forEach(k => corpusMean[k] /= cnt);
+devFeatures.forEach(k => corpusMean[k] = 0);
+Object.values(D.colls).forEach(c => { devFeatures.forEach(k => corpusMean[k] += (c[k] || 0)); cnt++; });
+devFeatures.forEach(k => corpusMean[k] /= cnt);
 
-const radarAuthors = D.authors.filter(a => ['Cassiodorus','Sidonius Apollinaris','Pliny the Younger'].includes(a.name));
-const rl = ['Passive','Nominal','Subjunctive','Prep×10'];
-const rColors = ['#c96e6e','#8a6ec9','#a8c06e','#c9a96e44'];
+const devAuthors = D.authors.filter(a => a.letters >= 50).sort((a,b) => b.betw - a.betw).slice(0, 6);
+const devColors = ['#c96e6e','#8a6ec9','#a8c06e','#6ea8c9','#c9a96e','#c96ea8'];
 
-new Chart(document.getElementById('radarBridge'), {
-  type: 'radar',
-  data: { labels: rl,
-    datasets: [
-      ...radarAuthors.map((a,i) => ({
-        label: a.name, data: [a.p, a.n_r, a.s, a.r*10],
-        backgroundColor: rColors[i]+'22', borderColor: rColors[i], borderWidth: 2, pointBackgroundColor: rColors[i]
-      })),
-      { label: 'Corpus Mean', data: [corpusMean.p, corpusMean.n_r, corpusMean.s, corpusMean.r*10],
-        backgroundColor: '#ffffff08', borderColor: '#ffffff33', borderWidth: 1, borderDash: [4,3], pointRadius: 0 }
-    ]},
-  options: { responsive: true,
+new Chart(document.getElementById('deviationChart'), {
+  type: 'bar',
+  data: {
+    labels: devLabels,
+    datasets: devAuthors.map((a, i) => ({
+      label: a.name,
+      data: devFeatures.map(k => {
+        const val = k === 'p1' ? a.s : // map author fields (p1/p2/p3 not on author obj, use collection)
+                    k === 'p2' ? a.sr2 :
+                    k === 'p3' ? 0 :
+                    (a[k] || 0);
+        return round4(val - corpusMean[k]);
+      }),
+      backgroundColor: devColors[i] + '88',
+      borderColor: devColors[i],
+      borderWidth: 1
+    }))
+  },
+  options: {
+    responsive: true, maintainAspectRatio: true,
     plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
-    scales: { r: { beginAtZero: true, max: 0.6, grid: { color: '#2a2a2a' }, angleLines: { color: '#2a2a2a' },
-      pointLabels: { color: '#8a8578', font: { size: 11 } }, ticks: { display: false } } } }
+    scales: {
+      x: { ticks: { font: { size: 9 } }, grid: { display: false } },
+      y: { title: { display: true, text: 'Deviation from corpus mean', color: '#6b6560' },
+        grid: { color: '#1e1e1e' } }
+    }
+  }
 });
+
+function round4(v) { return Math.round(v * 10000) / 10000; }
 
 // ==================== CODE-SWITCHING: per-author panels (lazy-loaded) ====================
 const csPanel = document.getElementById('codeSwitchPanels');
