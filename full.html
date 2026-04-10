@@ -101,7 +101,7 @@
     <div class="box-q">How do grammatical case proportions change over time?</div>
     <canvas id="caseChart"></canvas>
     <div class="interp">
-      <strong>What you're seeing:</strong> Each bar shows the mean case distribution for one collection, ordered chronologically. <strong>The accusative share drops from ~40% (Cicero) to ~25% (Gregory)</strong> while ablative rises. This is the morphological fingerprint of the synthetic-to-analytic transition: bare case constructions give way to prepositional phrases (<em>de + ablative</em> replacing genitive, <em>ad + accusative</em> replacing dative).
+      <strong>What you're seeing:</strong> Each bar shows the mean case distribution for one collection, ordered chronologically. The vocative (pink) is a mode-of-address marker &mdash; direct naming of the recipient (<em>mi Attice</em>, <em>frater carissime</em>). <strong>Key patterns:</strong> The accusative share drops from ~40% (Cicero) to ~25% (Gregory) while ablative rises &mdash; the synthetic-to-analytic transition. Vocative is small but informative: Pliny and Venantius Fortunatus use it 3&ndash;4× more than Cassiodorus, signaling a more personal register.
     </div>
   </div>
 </div>
@@ -291,6 +291,7 @@ new Chart(document.getElementById('caseChart'), {
       { label: 'Acc', data: top12.map(k => D.colls[k].acc), backgroundColor: '#6ec9a8cc' },
       { label: 'Abl', data: top12.map(k => D.colls[k].abl), backgroundColor: '#6ea8c9cc' },
       { label: 'Dat', data: top12.map(k => D.colls[k].dat), backgroundColor: '#8a6ec9cc' },
+      { label: 'Voc', data: top12.map(k => D.colls[k].voc || 0), backgroundColor: '#c96ea8cc' },
     ]},
   options: { responsive: true,
     plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
